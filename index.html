@@ -110,7 +110,28 @@
       userId: liff.getContext().userId,
       processNo: processNo.value,
       flNumber: flNumber.value,
-      btNumber:
+      btNumber: btNumber.value
+    };
+
+    if (!data.processNo || !data.flNumber || !data.btNumber) {
+      alert("กรุณาเลือกข้อมูลให้ครบ");
+      return;
+    }
+
+    fetch(FLOW_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    }).then(() => {
+      alert("บันทึกข้อมูลเรียบร้อย");
+      liff.closeWindow();
+    });
+  }
+</script>
+
+</body>
+</html>
+
 
 
 
