@@ -1,36 +1,87 @@
 <!DOCTYPE html>
-<html>
+<html lang="th">
 <head>
-  <meta charset="utf-8">
-  <title>กรอกข้อมูล</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เพิ่มข้อมูล</title>
+
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 16px;
+      background: #f5f5f5;
+    }
+    h3 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+    select, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 6px;
+      font-size: 16px;
+    }
+    button {
+      margin-top: 20px;
+      background: #06c755;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+    }
+  </style>
 </head>
+
 <body>
 
-<h3>กรอกข้อมูล</h3>
+<h3>เพิ่มข้อมูล</h3>
 
-<select id="topic1">
-  <option value="">เลือกหัวข้อ 1</option>
-  <option value="A">A</option>
-  <option value="B">B</option>
-</select><br><br>
+<label>Process_No</label>
+<select id="processNo">
+  <option value="">-- เลือก Process --</option>
+  <option value="Proc_No.1">Proc_No.1</option>
+  <option value="Proc_No.2">Proc_No.2</option>
+  <option value="Proc_No.3">Proc_No.3</option>
+</select>
 
-<select id="topic2">
-  <option value="">เลือกหัวข้อ 2</option>
-  <option value="X">X</option>
-  <option value="Y">Y</option>
-</select><br><br>
+<label>FL_Number</label>
+<select id="flNumber" onchange="updateBT()">
+  <option value="">-- เลือก FL --</option>
+  <option value="FL-01">FL-01</option>
+  <option value="FL-02">FL-02</option>
+  <option value="FL-03">FL-03</option>
+</select>
 
-<select id="topic3">
-  <option value="">เลือกหัวข้อ 3</option>
-  <option value="1">1</option>
-  <option value="2">2</option>
-</select><br><br>
+<label>BT_Number</label>
+<select id="btNumber">
+  <option value="">-- เลือก BT --</option>
+</select>
 
-<button onclick="submitForm()">บันทึก</button>
+<button onclick="submitForm()">บันทึกข้อมูล</button>
 
 <script>
   const LIFF_ID = "YOUR_LIFF_ID";
+  const FLOW_URL = "POWER_AUTOMATE_URL";
+
+  const btMap = {
+    "FL-01": [
+      "R-15686","R-15687","R-15688","R-15689","R-15690","R-15691","R-15692","R-15693"
+    ],
+    "FL-02": [
+      "R-15707","R-15708","R-15709","R-15710","R-15711","R-15712","R-15713",
+      "R-15714","R-15715","R-15716","R-15717","R-15718","R-15719","R-15720",
+      "R-15721","R-15765","R-16127"
+    ],
+    "FL-03": [
+      "R-15651","R-15652","R-15653","R-15654","R-15655","R-15656","R-15657",
+      "R-15658","R-15659","R-15660","R-15661","R-15662","R-15663"
+    ]
+  };
 
   liff.init({ liffId: LIFF_ID }).then(() => {
     if (!liff.isLoggedIn()) {
@@ -38,22 +89,25 @@
     }
   });
 
-  function submitForm() {
-    fetch("POWER_AUTOMATE_URL", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        userId: liff.getContext().userId,
-        topic1: topic1.value,
-        topic2: topic2.value,
-        topic3: topic3.value
-      })
-    }).then(() => {
-      alert("บันทึกเรียบร้อย");
-      liff.closeWindow();
-    });
-  }
-</script>
+  function updateBT() {
+    const fl = document.getElementById("flNumber").value;
+    const btSelect = document.getElementById("btNumber");
 
-</body>
-</html>
+    btSelect.innerHTML = '<option value="">-- เลือก BT --</option>';
+
+    if (btMap[fl]) {
+      btMap[fl].forEach(bt => {
+        const opt = document.createElement("option");
+        opt.value = bt;
+        opt.textContent = bt;
+        btSelect.appendChild(opt);
+      });
+    }
+  }
+
+  function submitForm() {
+    const data = {
+      userId: liff.getContext().userId,
+      processNo: processNo.value,
+      flNumber: flNumber.value,
+      btNumber:
