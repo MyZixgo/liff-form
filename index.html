@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>กรอกข้อมูล</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+
+<h3>กรอกข้อมูล</h3>
+
+<select id="topic1">
+  <option value="">เลือกหัวข้อ 1</option>
+  <option value="A">A</option>
+  <option value="B">B</option>
+</select><br><br>
+
+<select id="topic2">
+  <option value="">เลือกหัวข้อ 2</option>
+  <option value="X">X</option>
+  <option value="Y">Y</option>
+</select><br><br>
+
+<select id="topic3">
+  <option value="">เลือกหัวข้อ 3</option>
+  <option value="1">1</option>
+  <option value="2">2</option>
+</select><br><br>
+
+<button onclick="submitForm()">บันทึก</button>
+
+<script>
+  const LIFF_ID = "YOUR_LIFF_ID";
+
+  liff.init({ liffId: LIFF_ID }).then(() => {
+    if (!liff.isLoggedIn()) {
+      liff.login();
+    }
+  });
+
+  function submitForm() {
+    fetch("POWER_AUTOMATE_URL", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId: liff.getContext().userId,
+        topic1: topic1.value,
+        topic2: topic2.value,
+        topic3: topic3.value
+      })
+    }).then(() => {
+      alert("บันทึกเรียบร้อย");
+      liff.closeWindow();
+    });
+  }
+</script>
+
+</body>
+</html>
