@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>เพิ่มข้อมูล</title>
 
+  <!-- LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
   <style>
@@ -51,7 +52,7 @@
 
 <label>Forklift No</label>
 <select id="flNumber" onchange="updateBT()">
-  <option value="">-- เลือก FL --</option>
+  <option value="">-- เลือก โฟล์คลิฟท์ --</option>
   <option value="FL-01">FL-01</option>
   <option value="FL-02">FL-02</option>
   <option value="FL-03">FL-03</option>
@@ -59,41 +60,63 @@
 
 <label>Battery No</label>
 <select id="btNumber">
-  <option value="">-- เลือก BT --</option>
+  <option value="">-- เลือก แบตเตอรี่ --</option>
 </select>
 
 <button onclick="submitForm()">บันทึกข้อมูล</button>
 
 <script>
+  /* ================= CONFIG ================= */
   const LIFF_ID = "2008917250-2HZ9qo2C";
   const FLOW_URL = "https://defaultd9cd485e39bd4cc995398c97631fbb.71.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/6195382cbe7940ccb47ec0b364f02c8b/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=LOAM7JCklNTPQbiVkRekzwQFxFiQ32bUtKrMf7Vb5Pc";
 
+  /* ============ FL → BT Mapping ============ */
   const btMap = {
     "FL-01": [
-      "R-15686","R-15687","R-15688","R-15689","R-15690","R-15691","R-15692","R-15693"
+      "R-15686","R-15687","R-15688","R-15689",
+      "R-15690","R-15691","R-15692","R-15693"
     ],
     "FL-02": [
-      "R-15707","R-15708","R-15709","R-15710","R-15711","R-15712","R-15713",
-      "R-15714","R-15715","R-15716","R-15717","R-15718","R-15719","R-15720",
-      "R-15721","R-15765","R-16127"
+      "R-15707","R-15708","R-15709","R-15710","R-15711",
+      "R-15712","R-15713","R-15714","R-15715","R-15716",
+      "R-15717","R-15718","R-15719","R-15720","R-15721",
+      "R-15765","R-16127"
     ],
     "FL-03": [
-      "R-15651","R-15652","R-15653","R-15654","R-15655","R-15656","R-15657",
-      "R-15658","R-15659","R-15660","R-15661","R-15662","R-15663"
+      "R-15651","R-15652","R-15653","R-15654","R-15655",
+      "R-15656","R-15657","R-15658","R-15659","R-15660",
+      "R-15661","R-15662","R-15663"
     ]
   };
 
+  /* ================= LIFF INIT ================= */
   liff.init({ liffId: LIFF_ID }).then(() => {
     if (!liff.isLoggedIn()) {
       liff.login();
     }
   });
 
+  /* ============ Utility Date/Time ============ */
+  function pad(num) {
+    return num.toString().padStart(2, '0');
+  }
+
+  function getDateSubmit() {
+    const d = new Date();
+    return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())}`;
+  }
+
+  function getTimeSubmit() {
+    const d = new Date();
+    return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+
+  /* ============ Update BT Dropdown ============ */
   function updateBT() {
     const fl = document.getElementById("flNumber").value;
     const btSelect = document.getElementById("btNumber");
 
-    btSelect.innerHTML = '<option value="">-- เลือก BT --</option>';
+    btSelect.innerHTML = '<option value="">-- เลือก แบตเตอรี่ --</option>';
 
     if (btMap[fl]) {
       btMap[fl].forEach(bt => {
@@ -105,12 +128,15 @@
     }
   }
 
+  /* ================= Submit ================= */
   function submitForm() {
     const data = {
       userId: liff.getContext().userId,
       processNo: processNo.value,
       flNumber: flNumber.value,
-      btNumber: btNumber.value
+      btNumber: btNumber.value,
+      DateSubmit: getDateSubmit(),
+      TimeSubmit: getTimeSubmit()
     };
 
     if (!data.processNo || !data.flNumber || !data.btNumber) {
@@ -131,7 +157,3 @@
 
 </body>
 </html>
-
-
-
-
