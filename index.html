@@ -45,9 +45,12 @@
 <label>Process No</label>
 <select id="processNo">
   <option value="">-- เลือก Process --</option>
-  <option value="Proc_No.1">Proc_No.1</option>
-  <option value="Proc_No.2">Proc_No.2</option>
-  <option value="Proc_No.3">Proc_No.3</option>
+  <option value="G2 P-Lane In">G2 P-Lane In</option>
+  <option value="G2 P-Lane Out">G2 P-Lane Out</option>
+  <option value="G2 Transit">G2 Transit</option>
+  <option value="G3 P-Lane In">G3 P-Lane In</option>
+  <option value="G3 P-Lane Out">G3 P-Lane Out</option>
+  <option value="G3 Transit">G3 Transit</option>
 </select>
 
 <label>Forklift No</label>
@@ -101,14 +104,20 @@
     return num.toString().padStart(2, '0');
   }
 
-  function getDateSubmit() {
-    const d = new Date();
+  function formatDate(d) {
     return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())}`;
   }
 
-  function getTimeSubmit() {
-    const d = new Date();
+  function formatTime(d) {
     return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+
+  function getSubmitDateTime() {
+    return new Date(); // เวลาปัจจุบัน
+  }
+
+  function getChangeDateTime(submitDate) {
+    return new Date(submitDate.getTime() + (4 * 60 * 60 * 1000)); // +4 ชั่วโมง
   }
 
   /* ============ Update BT Dropdown ============ */
@@ -130,13 +139,21 @@
 
   /* ================= Submit ================= */
   function submitForm() {
+
+    const submitDate = getSubmitDateTime();
+    const changeDate = getChangeDateTime(submitDate);
+
     const data = {
       userId: liff.getContext().userId,
       processNo: processNo.value,
       flNumber: flNumber.value,
       btNumber: btNumber.value,
-      DateSubmit: getDateSubmit(),
-      TimeSubmit: getTimeSubmit()
+
+      DateSubmit: formatDate(submitDate),
+      TimeSubmit: formatTime(submitDate),
+
+      DateChange: formatDate(changeDate),
+      TimeChange: formatTime(changeDate)
     };
 
     if (!data.processNo || !data.flNumber || !data.btNumber) {
