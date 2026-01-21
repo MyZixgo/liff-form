@@ -135,9 +135,24 @@
     return new Date(); // เวลาปัจจุบัน
   }
 
+  //function getChangeDateTime(submitDate) {
+  //  return new Date(submitDate.getTime() + (5 * 60 * 60 * 1000)); // +5 ชั่วโมง
+  //}
+
   function getChangeDateTime(submitDate) {
-    return new Date(submitDate.getTime() + (5 * 60 * 60 * 1000)); // +4 ชั่วโมง
+    const processNo = document.getElementById("processNo").value;
+
+    let addHours = 0;
+
+    if (processNo === "P-Lane In" || processNo === "P-Lane Out") {
+      addHours = 5;
+    } else if (processNo === "Transit") {
+      addHours = 16;
+    }
+
+    return new Date(submitDate.getTime() + (addHours * 60 * 60 * 1000));
   }
+
 
   const select = document.getElementById("flNumber");
   for (let i = 1; i <= 40; i++) {
