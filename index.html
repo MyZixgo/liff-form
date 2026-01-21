@@ -117,6 +117,21 @@
 
     };
 
+    //เวลาพักเบรคปรกติ
+    const breakTimes = [
+      // กะกลางวัน
+      { start: "09:30", end: "09:40" },
+      { start: "11:30", end: "12:30" },
+      { start: "14:30", end: "14:40" },
+      { start: "16:30", end: "17:00" },
+
+      // กะกลางคืน
+      { start: "21:30", end: "21:40" },
+      { start: "23:30", end: "00:30" },
+      { start: "02:30", end: "02:40" },
+      { start: "04:30", end: "05:00" }
+    ];
+
     /* ================= LIFF INIT ================= */
     liff.init({ liffId: LIFF_ID }).then(() => {
       if (!liff.isLoggedIn()) {
@@ -155,11 +170,47 @@
       );
     }
 
+    /* ============ ฟังก์ชันเช็คว่าเวลาพักเบรค ============ */
+    function isBreakTime(date) {
+      const minutes = date.getHours() * 60 + date.getMinutes();
 
+      return breakTimes.some(b => {
+        const [sh, sm] = b.start.split(":").map(Number);
+        const [eh, em] = b.end.split(":").map(Number);
+
+        const startMin = sh * 60 + sm;
+        const endMin = eh * 60 + em;
+
+        // กรณีข้ามวัน (เช่น 23:30 - 00:30)
+        if (startMin > endMin) {
+          return minutes >= startMin || minutes < endMin;
+        }
+
+        return minutes >= startMin && minutes < endMin;
+      });
+    }
+    /* ============ ฟังก์ชันบวกว่าเวลาพักเบรค ============ */
+    function addWorkingHours(startDate, hoursToAdd) {
+      let current = new Date(startDate);
+      let minutesLeft = hoursToAdd * 60;
+
+      while (minutesLeft > 0) {
+        current.setMinutes(current.getMinutes() + 1);
+
+        // ถ้าไม่ใช่เวลาพัก → นับ
+        if (!isBreakTime(current)) {
+          minutesLeft--;
+        }
+      }
+
+      return current;
+    }
+
+    /* ============ ฟังก์ชันคำนวนเวลาเปลี่ยน Bat ============ */
     function getChangeDateTime(submitDate) {
       const processNo = document.getElementById("processNo").value;
 
-      if (!processNo) return null; // ยังไม่เลือก Process
+      if (!processNo) return null;
 
       let addHours = 0;
 
@@ -169,8 +220,9 @@
         addHours = 16;
       }
 
-      return new Date(submitDate.getTime() + (addHours * 60 * 60 * 1000));
+      return addWorkingHours(submitDate, addHours);
     }
+
 
     const select = document.getElementById("flNumber");
     for (let i = 1; i <= 40; i++) {
