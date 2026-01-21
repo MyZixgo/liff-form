@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,20 +15,25 @@
       padding: 16px;
       background: #f5f5f5;
     }
+
     h3 {
       text-align: center;
     }
+
     label {
       display: block;
       margin-top: 12px;
       font-weight: bold;
     }
-    select, button {
+
+    select,
+    button {
       width: 100%;
       padding: 12px;
       margin-top: 6px;
       font-size: 16px;
     }
+
     button {
       margin-top: 20px;
       background: #06c755;
@@ -40,177 +46,199 @@
 
 <body>
 
-<h3>เพิ่มข้อมูล</h3>
+  <h3>เพิ่มข้อมูล</h3>
 
-<label>Process No</label>
-<select id="processNo">
-  <option value="">-- เลือก Process --</option>
-  <option value="P-Lane In">G2 P-Lane In</option> 
-  <option value="P-Lane Out">G2 P-Lane Out</option>
-  <option value="Transit">G2 Transit</option>
-</select>
-
-
-<label>Forklift No</label>
-<select id="flNumber" onchange="updateBT()">
-  <option value="">-- เลือก โฟล์คลิฟท์ --</option>
-</select>
+  <label>Process No</label>
+  <select id="processNo" onchange="previewChangeTime()">
+    <option value="">-- เลือก Process --</option>
+    <option value="P-Lane In">G2 P-Lane In</option>
+    <option value="P-Lane Out">G2 P-Lane Out</option>
+    <option value="Transit">G2 Transit</option>
+  </select>
 
 
-<label>Battery No</label>
-<select id="btNumber">
-  <option value="">-- เลือก แบตเตอรี่ --</option>
-</select>
-
-<button onclick="submitForm()">บันทึกข้อมูล</button>
-
-<script>
-  /* ================= CONFIG ================= */
-  const LIFF_ID = "2008917250-2HZ9qo2C";
-  const FLOW_URL = "https://defaultd9cd485e39bd4cc995398c97631fbb.71.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/6195382cbe7940ccb47ec0b364f02c8b/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=LOAM7JCklNTPQbiVkRekzwQFxFiQ32bUtKrMf7Vb5Pc";
-
-  /* ============ FL → BT Mapping ============ */
-  const btMap = {
-    "FL-01": ["R-15707","R-15708","R-15709","R-15710","R-15711","R-15712","R-15713","R-15714","R-15715","R-15716","R-15717","R-15718","R-15719","R-15720","R-15721","R-15765","R-16127"],
-    "FL-02": ["R-15707","R-15708","R-15709","R-15710","R-15711","R-15712","R-15713","R-15714","R-15715","R-15716","R-15717","R-15718","R-15719","R-15720","R-15721","R-15765","R-16127"],
-
-    "FL-04": ["R-15707","R-15708","R-15709","R-15710","R-15711","R-15712","R-15713","R-15714","R-15715","R-15716","R-15717","R-15718","R-15719","R-15720","R-15721","R-15765","R-16127"],
-    "FL-05": ["R-15707","R-15708","R-15709","R-15710","R-15711","R-15712","R-15713","R-15714","R-15715","R-15716","R-15717","R-15718","R-15719","R-15720","R-15721","R-15765","R-16127"],
-    "FL-06": ["R-15707","R-15708","R-15709","R-15710","R-15711","R-15712","R-15713","R-15714","R-15715","R-15716","R-15717","R-15718","R-15719","R-15720","R-15721","R-15765","R-16127"],
-    "FL-07": ["R-15707","R-15708","R-15709","R-15710","R-15711","R-15712","R-15713","R-15714","R-15715","R-15716","R-15717","R-15718","R-15719","R-15720","R-15721","R-15765","R-16127"],
-    "FL-08": ["R-15707","R-15708","R-15709","R-15710","R-15711","R-15712","R-15713","R-15714","R-15715","R-15716","R-15717","R-15718","R-15719","R-15720","R-15721","R-15765","R-16127"],
-    "FL-09": ["R-15707","R-15708","R-15709","R-15710","R-15711","R-15712","R-15713","R-15714","R-15715","R-15716","R-15717","R-15718","R-15719","R-15720","R-15721","R-15765","R-16127"],
-    "FL-10": ["R-15651","R-15652","R-15653","R-15654","R-15655","R-15656","R-15657","R-15658","R-15659","R-15660","R-15661","R-15662","R-15663"],
-    "FL-11": ["R-15651","R-15652","R-15653","R-15654","R-15655","R-15656","R-15657","R-15658","R-15659","R-15660","R-15661","R-15662","R-15663"],
-
-    "FL-13": ["R-15651","R-15652","R-15653","R-15654","R-15655","R-15656","R-15657","R-15658","R-15659","R-15660","R-15661","R-15662","R-15663"],
-    "FL-14": ["R-15686","R-15687","R-15688","R-15689","R-15690","R-15691","R-15692","R-15693"],
-    "FL-15": ["R-15651","R-15652","R-15653","R-15654","R-15655","R-15656","R-15657","R-15658","R-15659","R-15660","R-15661","R-15662","R-15663"],
-    "FL-16": ["R-15707","R-15708","R-15709","R-15710","R-15711","R-15712","R-15713","R-15714","R-15715","R-15716","R-15717","R-15718","R-15719","R-15720","R-15721","R-15765","R-16127"],
-    "FL-17": ["R-15651","R-15652","R-15653","R-15654","R-15655","R-15656","R-15657","R-15658","R-15659","R-15660","R-15661","R-15662","R-15663"],
-    "FL-18": ["R-15686","R-15687","R-15688","R-15689","R-15690","R-15691","R-15692","R-15693"],
-    "FL-19": ["R-15686","R-15687","R-15688","R-15689","R-15690","R-15691","R-15692","R-15693"],
-    "FL-20": ["R-15686","R-15687","R-15688","R-15689","R-15690","R-15691","R-15692","R-15693"],
-    "FL-21": ["R-15686","R-15687","R-15688","R-15689","R-15690","R-15691","R-15692","R-15693"],
-    "FL-22": ["R-15686","R-15687","R-15688","R-15689","R-15690","R-15691","R-15692","R-15693"],
-    "FL-23": ["R-15707","R-15708","R-15709","R-15710","R-15711","R-15712","R-15713","R-15714","R-15715","R-15716","R-15717","R-15718","R-15719","R-15720","R-15721","R-15765","R-16127"],
-    "FL-24": ["R-15707","R-15708","R-15709","R-15710","R-15711","R-15712","R-15713","R-15714","R-15715","R-15716","R-15717","R-15718","R-15719","R-15720","R-15721","R-15765","R-16127"],
-
-    "FL-26": ["R-15707","R-15708","R-15709","R-15710","R-15711","R-15712","R-15713","R-15714","R-15715","R-15716","R-15717","R-15718","R-15719","R-15720","R-15721","R-15765","R-16127"],
-    "FL-27": ["R-15707","R-15708","R-15709","R-15710","R-15711","R-15712","R-15713","R-15714","R-15715","R-15716","R-15717","R-15718","R-15719","R-15720","R-15721","R-15765","R-16127"],
-
-    "FL-29": ["R-15651","R-15652","R-15653","R-15654","R-15655","R-15656","R-15657","R-15658","R-15659","R-15660","R-15661","R-15662","R-15663"],
-    "FL-30": ["R-15686","R-15687","R-15688","R-15689","R-15690","R-15691","R-15692","R-15693"],
-    "FL-32": ["R-15651","R-15652","R-15653","R-15654","R-15655","R-15656","R-15657","R-15658","R-15659","R-15660","R-15661","R-15662","R-15663"],
-    "FL-33": ["R-15651","R-15652","R-15653","R-15654","R-15655","R-15656","R-15657","R-15658","R-15659","R-15660","R-15661","R-15662","R-15663"],
-    "FL-34": ["R-15651","R-15652","R-15653","R-15654","R-15655","R-15656","R-15657","R-15658","R-15659","R-15660","R-15661","R-15662","R-15663"],
-    "FL-35": ["R-15651","R-15652","R-15653","R-15654","R-15655","R-15656","R-15657","R-15658","R-15659","R-15660","R-15661","R-15662","R-15663"],
-    "FL-36": ["R-15651","R-15652","R-15653","R-15654","R-15655","R-15656","R-15657","R-15658","R-15659","R-15660","R-15661","R-15662","R-15663"],
-    "FL-37": ["R-15651","R-15652","R-15653","R-15654","R-15655","R-15656","R-15657","R-15658","R-15659","R-15660","R-15661","R-15662","R-15663"],
-    "FL-38": ["R-15651","R-15652","R-15653","R-15654","R-15655","R-15656","R-15657","R-15658","R-15659","R-15660","R-15661","R-15662","R-15663"]
-
-  };
-
-  /* ================= LIFF INIT ================= */
-  liff.init({ liffId: LIFF_ID }).then(() => {
-    if (!liff.isLoggedIn()) {
-      liff.login();
-    }
-  });
-
-  /* ============ Utility Date/Time ============ */
-  function pad(num) {
-    return num.toString().padStart(2, '0');
-  }
-
-  function formatDate(d) {
-    return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())}`;
-  }
-
-  function formatTime(d) {
-    return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-  }
-
-  function getSubmitDateTime() {
-    return new Date(); // เวลาปัจจุบัน
-  }
-
-  //function getChangeDateTime(submitDate) {
-  //  return new Date(submitDate.getTime() + (5 * 60 * 60 * 1000)); // +5 ชั่วโมง
-  //}
-
-  function getChangeDateTime(submitDate) {
-    const processNo = document.getElementById("processNo").value;
-
-    let addHours = 0;
-
-    if (processNo === "P-Lane In" || processNo === "P-Lane Out") {
-      addHours = 5;
-    } else if (processNo === "Transit") {
-      addHours = 16;
-    }
-
-    return new Date(submitDate.getTime() + (addHours * 60 * 60 * 1000));
-  }
+  <label>Forklift No</label>
+  <select id="flNumber" onchange="updateBT()">
+    <option value="">-- เลือก โฟล์คลิฟท์ --</option>
+  </select>
 
 
-  const select = document.getElementById("flNumber");
-  for (let i = 1; i <= 40; i++) {
-    const fl = `FL-${String(i).padStart(2, "0")}`;
-    select.innerHTML += `<option value="${fl}">${fl}</option>`;
-  }
+  <label>Battery No</label>
+  <select id="btNumber">
+    <option value="">-- เลือก แบตเตอรี่ --</option>
+  </select>
 
-  /* ============ Update BT Dropdown ============ */
-  function updateBT() {
-    const fl = document.getElementById("flNumber").value;
-    const btSelect = document.getElementById("btNumber");
+  <button onclick="submitForm()">บันทึกข้อมูล</button>
 
-    btSelect.innerHTML = '<option value="">-- เลือก แบตเตอรี่ --</option>';
+  <script>
+    /* ================= CONFIG ================= */
+    const LIFF_ID = "2008917250-2HZ9qo2C";
+    const FLOW_URL = "https://defaultd9cd485e39bd4cc995398c97631fbb.71.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/6195382cbe7940ccb47ec0b364f02c8b/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=LOAM7JCklNTPQbiVkRekzwQFxFiQ32bUtKrMf7Vb5Pc";
 
-    if (btMap[fl]) {
-      btMap[fl].forEach(bt => {
-        const opt = document.createElement("option");
-        opt.value = bt;
-        opt.textContent = bt;
-        btSelect.appendChild(opt);
-      });
-    }
-  }
+    /* ============ FL → BT Mapping ============ */
+    const btMap = {
+      "FL-01": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
+      "FL-02": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
 
-  /* ================= Submit ================= */
-  function submitForm() {
+      "FL-04": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
+      "FL-05": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
+      "FL-06": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
+      "FL-07": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
+      "FL-08": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
+      "FL-09": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
+      "FL-10": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
+      "FL-11": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
 
-    const submitDate = getSubmitDateTime();
-    const changeDate = getChangeDateTime(submitDate);
+      "FL-13": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
+      "FL-14": ["R-15686", "R-15687", "R-15688", "R-15689", "R-15690", "R-15691", "R-15692", "R-15693"],
+      "FL-15": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
+      "FL-16": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
+      "FL-17": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
+      "FL-18": ["R-15686", "R-15687", "R-15688", "R-15689", "R-15690", "R-15691", "R-15692", "R-15693"],
+      "FL-19": ["R-15686", "R-15687", "R-15688", "R-15689", "R-15690", "R-15691", "R-15692", "R-15693"],
+      "FL-20": ["R-15686", "R-15687", "R-15688", "R-15689", "R-15690", "R-15691", "R-15692", "R-15693"],
+      "FL-21": ["R-15686", "R-15687", "R-15688", "R-15689", "R-15690", "R-15691", "R-15692", "R-15693"],
+      "FL-22": ["R-15686", "R-15687", "R-15688", "R-15689", "R-15690", "R-15691", "R-15692", "R-15693"],
+      "FL-23": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
+      "FL-24": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
 
-    const data = {
-      userId: liff.getContext().userId,
-      processNo: processNo.value,
-      flNumber: flNumber.value,
-      btNumber: btNumber.value,
+      "FL-26": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
+      "FL-27": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
 
-      DateSubmit: formatDate(submitDate),
-      TimeSubmit: formatTime(submitDate),
+      "FL-29": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
+      "FL-30": ["R-15686", "R-15687", "R-15688", "R-15689", "R-15690", "R-15691", "R-15692", "R-15693"],
+      "FL-32": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
+      "FL-33": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
+      "FL-34": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
+      "FL-35": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
+      "FL-36": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
+      "FL-37": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
+      "FL-38": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"]
 
-      DateChange: formatDate(changeDate),
-      TimeChange: formatTime(changeDate)
     };
 
-    if (!data.processNo || !data.flNumber || !data.btNumber) {
-      alert("กรุณาเลือกข้อมูลให้ครบ");
-      return;
+    /* ================= LIFF INIT ================= */
+    liff.init({ liffId: LIFF_ID }).then(() => {
+      if (!liff.isLoggedIn()) {
+        liff.login();
+      }
+    });
+
+    /* ============ Utility Date/Time ============ */
+    function pad(num) {
+      return num.toString().padStart(2, '0');
     }
 
-    fetch(FLOW_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data)
-    }).then(() => {
-      alert("บันทึกข้อมูลเรียบร้อย");
-      liff.closeWindow();
-    });
-  }
-</script>
+    function formatDate(d) {
+      return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())}`;
+    }
+
+    function formatTime(d) {
+      return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    }
+
+    function getSubmitDateTime() {
+      return new Date(); // เวลาปัจจุบัน
+    }
+
+    /* ============ ฟังก์ชัน Preview เวลา (เรียกตอนเปลี่ยน Process) ============ */
+    function previewChangeTime() {
+      const submitDate = getSubmitDateTime();
+      const changeDate = getChangeDateTime(submitDate);
+
+      if (!changeDate) return;
+
+      console.log(
+        "Preview Change:",
+        formatDate(changeDate),
+        formatTime(changeDate)
+      );
+    }
+
+
+    function getChangeDateTime(submitDate) {
+      const processNo = document.getElementById("processNo").value;
+
+      if (!processNo) return null; // ยังไม่เลือก Process
+
+      let addHours = 0;
+
+      if (processNo === "P-Lane In" || processNo === "P-Lane Out") {
+        addHours = 5;
+      } else if (processNo === "Transit") {
+        addHours = 16;
+      }
+
+      return new Date(submitDate.getTime() + (addHours * 60 * 60 * 1000));
+    }
+
+    const select = document.getElementById("flNumber");
+    for (let i = 1; i <= 40; i++) {
+      const fl = `FL-${String(i).padStart(2, "0")}`;
+      select.innerHTML += `<option value="${fl}">${fl}</option>`;
+    }
+
+    /* ============ Update BT Dropdown ============ */
+    function updateBT() {
+      const fl = document.getElementById("flNumber").value;
+      const btSelect = document.getElementById("btNumber");
+
+      btSelect.innerHTML = '<option value="">-- เลือก แบตเตอรี่ --</option>';
+
+      if (btMap[fl]) {
+        btMap[fl].forEach(bt => {
+          const opt = document.createElement("option");
+          opt.value = bt;
+          opt.textContent = bt;
+          btSelect.appendChild(opt);
+        });
+      }
+    }
+
+    /* ================= Submit ================= */
+    function submitForm() {
+
+      if (!processNo.value) {
+        alert("กรุณาเลือก Process No");
+        return;
+      }
+      if (!flNumber.value) {
+        alert("กรุณาเลือก Forklift No");
+        return;
+      }
+      if (!btNumber.value) {
+        alert("กรุณาเลือก Battery No");
+        return;
+      }
+
+      const submitDate = getSubmitDateTime();
+      const changeDate = getChangeDateTime(submitDate);
+
+      const data = {
+        userId: liff.getContext().userId,
+        processNo: processNo.value,
+        flNumber: flNumber.value,
+        btNumber: btNumber.value,
+
+        DateSubmit: formatDate(submitDate),
+        TimeSubmit: formatTime(submitDate),
+
+        DateChange: formatDate(changeDate),
+        TimeChange: formatTime(changeDate)
+      };
+
+      fetch(FLOW_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      }).then(() => {
+        alert("บันทึกข้อมูลเรียบร้อย");
+        liff.closeWindow();
+      });
+    }
+
+  </script>
 
 </body>
+
 </html>
