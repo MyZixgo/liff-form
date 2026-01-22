@@ -64,9 +64,15 @@
 
 
   <label>Battery No</label>
-  <select id="btNumber">
+  <select id="btNumber" onchange="previewChangeTime()">
     <option value="">-- เลือก แบตเตอรี่ --</option>
   </select>
+
+  <label>เวลาเปลี่ยนแบตครั้งถัดไป</label>
+  <div id="changeDateTime" style="margin-top:6px;padding:12px;background:#fff;border-radius:6px;
+              font-size:16px;color:#333;">
+    กรุณาเลือก Process
+  </div>
 
   <button onclick="submitForm()">บันทึกข้อมูล</button>
 
@@ -117,7 +123,7 @@
 
     };
 
-    //เวลาพักเบรคปรกติ
+    // เวลาพักเบรคปรกติ
     const breakTimes = [
       // กะกลางวัน
       { start: "09:30", end: "09:40" },
@@ -144,10 +150,12 @@
       return num.toString().padStart(2, '0');
     }
 
+    /* ============ Change Format Date ============ */
     function formatDate(d) {
       return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())}`;
     }
 
+    /* ============ Change Format Time ============ */
     function formatTime(d) {
       return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
     }
@@ -158,16 +166,26 @@
 
     /* ============ ฟังก์ชัน Preview เวลา (เรียกตอนเปลี่ยน Process) ============ */
     function previewChangeTime() {
+      const display = document.getElementById("changeDateTime");
+
+      if (!processNo.value) {
+        display.textContent = "กรุณาเลือก Process";
+        return;
+      }
+
       const submitDate = getSubmitDateTime();
       const changeDate = getChangeDateTime(submitDate);
 
-      if (!changeDate) return;
+      if (!changeDate) {
+        display.textContent = "-";
+        return;
+      }
 
-      console.log(
-        "Preview Change:",
-        formatDate(changeDate),
-        formatTime(changeDate)
-      );
+      display.innerHTML = `
+    📅 ${formatDate(changeDate)}
+    <br>
+    ⏰ ${formatTime(changeDate)}
+  `;
     }
 
     /* ============ ฟังก์ชันเช็คว่าเวลาพักเบรค ============ */
@@ -189,6 +207,7 @@
         return minutes >= startMin && minutes < endMin;
       });
     }
+
     /* ============ ฟังก์ชันบวกว่าเวลาพักเบรค ============ */
     function addWorkingHours(startDate, hoursToAdd) {
       let current = new Date(startDate);
@@ -206,7 +225,7 @@
       return current;
     }
 
-    /* ============ ฟังก์ชันคำนวนเวลาเปลี่ยน Bat ============ */
+    /* ============ ฟังก์ชันคำนวนเวลาเปลี่ยน Bat ครั้งถัดไป ============ */
     function getChangeDateTime(submitDate) {
       const processNo = document.getElementById("processNo").value;
 
@@ -222,7 +241,6 @@
 
       return addWorkingHours(submitDate, addHours);
     }
-
 
     const select = document.getElementById("flNumber");
     for (let i = 1; i <= 40; i++) {
@@ -245,7 +263,10 @@
           btSelect.appendChild(opt);
         });
       }
+
+      previewChangeTime();
     }
+
 
     /* ================= Submit ================= */
     function submitForm() {
