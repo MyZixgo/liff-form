@@ -160,6 +160,20 @@
       return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
     }
 
+    function formatThaiDate(d) {
+      const months = [
+        "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน",
+        "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม",
+        "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+      ];
+
+      const day = d.getDate();
+      const month = months[d.getMonth()];
+      const year = d.getFullYear() + 543;
+
+      return `${day} ${month} ${year}`;
+    }
+
     function getSubmitDateTime() {
       return new Date(); // เวลาปัจจุบัน
     }
@@ -182,7 +196,7 @@
       }
 
       display.innerHTML = `
-    📅 ${formatDate(changeDate)}
+    📅 ${formatThaiDate(changeDate)}
     <br>
     ⏰ ${formatTime(changeDate)}
   `;
