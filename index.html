@@ -51,9 +51,12 @@
   <label>Process No</label>
   <select id="processNo" onchange="previewChangeTime()">
     <option value="">-- เลือก Process --</option>
-    <option value="P-Lane In">G2 P-Lane In</option>
-    <option value="P-Lane Out">G2 P-Lane Out</option>
-    <option value="Transit">G2 Transit</option>
+    <option value="P-Lane In">P-Lane In</option>
+    <option value="P-Lane Out">P-Lane Out</option>
+    <option value="Transit">Transit</option>
+    <option value="Pre-Sort">Pre-Sort</option>
+    <option value="Empty">Empty</option>
+
   </select>
 
 
@@ -247,14 +250,34 @@
 
       let addHours = 0;
 
-      if (processNo === "P-Lane In" || processNo === "P-Lane Out") {
-        addHours = 5;
-      } else if (processNo === "Transit") {
-        addHours = 16;
+      switch (processNo) {
+        case "Transit":
+          addHours = 16;
+          break;
+
+        case "P-lane in":
+          addHours = 4;
+          break;
+
+        case "P-lane Out":
+          addHours = 6;
+          break;
+
+        case "Pre-Sort":
+          addHours = 5;
+          break;
+
+        case "Empty":
+          addHours = 5;
+          break;
+
+        default:
+          addHours = 0;
       }
 
       return addWorkingHours(submitDate, addHours);
     }
+
 
     const select = document.getElementById("flNumber");
     for (let i = 1; i <= 40; i++) {
