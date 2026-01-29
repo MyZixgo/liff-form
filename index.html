@@ -56,7 +56,6 @@
     <option value="Transit">Transit</option>
     <option value="Pre-Sort">Pre-Sort</option>
     <option value="Empty">Empty</option>
-
   </select>
 
 
@@ -255,11 +254,11 @@
           addHours = 16;
           break;
 
-        case "P-lane in":
+        case "P-Lane In":
           addHours = 4;
           break;
 
-        case "P-lane Out":
+        case "P-Lane Out":
           addHours = 6;
           break;
 
@@ -270,14 +269,10 @@
         case "Empty":
           addHours = 5;
           break;
-
-        default:
-          addHours = 0;
       }
 
       return addWorkingHours(submitDate, addHours);
     }
-
 
     const select = document.getElementById("flNumber");
     for (let i = 1; i <= 40; i++) {
