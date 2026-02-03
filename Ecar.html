@@ -122,29 +122,29 @@
         });
 
         /* ===== Update BT ===== */
-        // function updateBT() {
-        //     const fl = flSelect.value;
-        //     const btSelect = document.getElementById("btNumber");
+        function updateBT() {
+            const fl = flSelect.value;
+            const btSelect = document.getElementById("btNumber");
 
-        //     btSelect.innerHTML = '<option value="">-- เลือก แบตเตอรี่ --</option>';
+            btSelect.innerHTML = '<option value="">-- เลือก แบตเตอรี่ --</option>';
 
-        //     let btList = [];
+            let btList = [];
 
-        //     if (ecGroup1.includes(fl)) {
-        //         btList = ecBtGroup1;
-        //     } else if (ecGroup2.includes(fl)) {
-        //         btList = ecBtGroup2;
-        //     }
+            if (ecGroup1.includes(fl)) {
+                btList = ecBtGroup1;
+            } else if (ecGroup2.includes(fl)) {
+                btList = ecBtGroup2;
+            }
 
-        //     btList.forEach(bt => {
-        //         const opt = document.createElement("option");
-        //         opt.value = bt;
-        //         opt.textContent = bt;
-        //         btSelect.appendChild(opt);
-        //     });
+            btList.forEach(bt => {
+                const opt = document.createElement("option");
+                opt.value = bt;
+                opt.textContent = bt;
+                btSelect.appendChild(opt);
+            });
 
-        //     previewChangeTime();
-        // }
+            previewChangeTime();
+        }
 
         // เวลาพักเบรคปรกติ
         const breakTimes = [
@@ -298,23 +298,23 @@
         // }
 
         /* ============ Update BT Dropdown ============ */
-        function updateBT() {
-            const fl = document.getElementById("erNumber").value;
-            const btSelect = document.getElementById("btNumber");
+        // function updateBT() {
+        //     const fl = document.getElementById("erNumber").value;
+        //     const btSelect = document.getElementById("btNumber");
 
-            btSelect.innerHTML = '<option value="">-- เลือก แบตเตอรี่ --</option>';
+        //     btSelect.innerHTML = '<option value="">-- เลือก แบตเตอรี่ --</option>';
 
-            if (btMap[fl]) {
-                btMap[fl].forEach(bt => {
-                    const opt = document.createElement("option");
-                    opt.value = bt;
-                    opt.textContent = bt;
-                    btSelect.appendChild(opt);
-                });
-            }
+        //     if (btMap[fl]) {
+        //         btMap[fl].forEach(bt => {
+        //             const opt = document.createElement("option");
+        //             opt.value = bt;
+        //             opt.textContent = bt;
+        //             btSelect.appendChild(opt);
+        //         });
+        //     }
 
-            previewChangeTime();
-        }
+        //     previewChangeTime();
+        // }
 
 
         /* ================= Submit ================= */
