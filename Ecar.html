@@ -58,7 +58,7 @@
     </select>
 
     <label>E-Car No</label>
-    <select id="erNumber" onchange="updateBT()">
+    <select id="flNumber" onchange="updateBT()">
         <option value="">-- เลือก อีคาร์ --</option>
     </select>
 
@@ -110,8 +110,8 @@
             "R-15485", "R-15488", "R-15519"
         ];
 
-        /* ===== เติม EC ลง erNumber ===== */
-        const flSelect = document.getElementById("erNumber");
+        /* ===== เติม EC ลง flNumber ===== */
+        const flSelect = document.getElementById("flNumber");
         const allEC = [...new Set([...ecGroup1, ...ecGroup2])];
 
         allEC.forEach(ec => {
@@ -291,32 +291,6 @@
             return addWorkingHours(submitDate, addHours);
         }
 
-        // const select = document.getElementById("erNumber");
-        // for (let i = 1; i <= 40; i++) {
-        //     const fl = `FL-${String(i).padStart(2, "0")}`;
-        //     select.innerHTML += `<option value="${fl}">${fl}</option>`;
-        // }
-
-        /* ============ Update BT Dropdown ============ */
-        // function updateBT() {
-        //     const fl = document.getElementById("erNumber").value;
-        //     const btSelect = document.getElementById("btNumber");
-
-        //     btSelect.innerHTML = '<option value="">-- เลือก แบตเตอรี่ --</option>';
-
-        //     if (btMap[fl]) {
-        //         btMap[fl].forEach(bt => {
-        //             const opt = document.createElement("option");
-        //             opt.value = bt;
-        //             opt.textContent = bt;
-        //             btSelect.appendChild(opt);
-        //         });
-        //     }
-
-        //     previewChangeTime();
-        // }
-
-
         /* ================= Submit ================= */
         function submitForm() {
 
@@ -324,7 +298,7 @@
                 alert("กรุณาเลือก Process No");
                 return;
             }
-            if (!erNumber.value) {
+            if (!flNumber.value) {
                 alert("กรุณาเลือก Forklift No");
                 return;
             }
@@ -339,7 +313,7 @@
             const data = {
                 userId: liff.getContext().userId,
                 processNo: processNo.value,
-                erNumber: erNumber.value,
+                flNumber: flNumber.value,
                 btNumber: btNumber.value,
 
                 DateSubmit: formatDate(submitDate),
