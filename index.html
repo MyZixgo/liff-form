@@ -1,12 +1,10 @@
 <!DOCTYPE html>
 <html lang="th">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Forklift Battery Replacement</title>
 
-  <!-- LIFF SDK -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
   <style>
@@ -15,25 +13,18 @@
       padding: 16px;
       background: #f5f5f5;
     }
-
-    h3 {
-      text-align: center;
-    }
-
+    h3 { text-align: center; }
     label {
       display: block;
       margin-top: 12px;
       font-weight: bold;
     }
-
-    select,
-    button {
+    select, button {
       width: 100%;
       padding: 12px;
       margin-top: 6px;
       font-size: 16px;
     }
-
     button {
       margin-top: 20px;
       background: #06c755;
@@ -46,304 +37,186 @@
 
 <body>
 
-  <h3>เปลี่ยนแบตรถ Forklift</h3>
+<h3>เปลี่ยนแบตรถ Forklift</h3>
 
-  <label>Process No</label>
-  <select id="processNo" onchange="previewChangeTime()">
-    <option value="">-- เลือก Process --</option>
-    <option value="P-Lane In">P-Lane In</option>
-    <option value="P-Lane Out">P-Lane Out</option>
-    <option value="Transit">Transit</option>
-    <option value="Pre-Sort">Pre-Sort</option>
-    <option value="Empty">Empty</option>
-  </select>
+<label>Process No</label>
+<select id="processNo" onchange="previewChangeTime()">
+  <option value="">-- เลือก Process --</option>
 
+  <option value="Transit G2">Transit G2</option>
+  <option value="Transit P-lane in G2">Transit P-lane in G2</option>
+  <option value="P-lane Out G2">P-lane Out G2</option>
+  <option value="Pre-Sort G2">Pre-Sort G2</option>
+  <option value="Empty G2">Empty G2</option>
 
-  <label>Forklift No</label>
-  <select id="flNumber" onchange="updateBT()">
-    <option value="">-- เลือก โฟล์คลิฟท์ --</option>
-  </select>
+  <option value="Transit G3">Transit G3</option>
+  <option value="Transit P-lane in G3">Transit P-lane in G3</option>
+  <option value="P-lane Out G3">P-lane Out G3</option>
+  <option value="Empty G3">Empty G3</option>
+</select>
 
+<label>Forklift No</label>
+<select id="flNumber" onchange="updateBT()">
+  <option value="">-- เลือก Forklift --</option>
+</select>
 
-  <label>Battery No</label>
-  <select id="btNumber" onchange="previewChangeTime()">
-    <option value="">-- เลือก แบตเตอรี่ --</option>
-  </select>
+<label>Battery No</label>
+<select id="btNumber" onchange="previewChangeTime()">
+  <option value="">-- เลือก Battery --</option>
+</select>
 
-  <label>เวลาเปลี่ยนแบตครั้งถัดไป</label>
-  <div id="changeDateTime" style="margin-top:6px;padding:12px;background:#fff;border-radius:6px;
-              font-size:16px;color:#333;">
-    กรุณาเลือก Process
-  </div>
+<label>เวลาเปลี่ยนแบตครั้งถัดไป</label>
+<div id="changeDateTime"
+     style="margin-top:6px;padding:12px;background:#fff;border-radius:6px;font-size:16px;">
+  กรุณาเลือก Process
+</div>
 
-  <button onclick="submitForm()">บันทึกข้อมูล</button>
+<button onclick="submitForm()">บันทึกข้อมูล</button>
 
-  <script>
-    /* ================= CONFIG ================= */
-    const LIFF_ID = "2008917250-2HZ9qo2C";
-    const FLOW_URL = "https://defaultd9cd485e39bd4cc995398c97631fbb.71.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/6195382cbe7940ccb47ec0b364f02c8b/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=LOAM7JCklNTPQbiVkRekzwQFxFiQ32bUtKrMf7Vb5Pc";
+<script>
+/* ================= CONFIG ================= */
+const LIFF_ID = "2008917250-2HZ9qo2C";
+const FLOW_URL = "https://defaultd9cd485e39bd4cc995398c97631fbb.71.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/6195382cbe7940ccb47ec0b364f02c8b/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=LOAM7JCklNTPQbiVkRekzwQFxFiQ32bUtKrMf7Vb5Pc";
 
-    /* ============ FL → BT Mapping ============ */
-    const btMap = {
-      "FL-01": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
-      "FL-02": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
+/* ================= FL / BT GROUP ================= */
+const flGroup1 = ["FL-14","FL-18","FL-19","FL-20","FL-21","FL-22","FL-30"];
+const flGroup2 = ["FL-01","FL-02","FL-04","FL-05","FL-06","FL-07","FL-08","FL-09","FL-16","FL-23","FL-24","FL-26","FL-27","FL-15","FL-17"];
+const flGroup3 = ["FL-10","FL-11","FL-13","FL-29","FL-32","FL-33","FL-34","FL-35","FL-36","FL-37","FL-38"];
 
-      "FL-04": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
-      "FL-05": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
-      "FL-06": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
-      "FL-07": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
-      "FL-08": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
-      "FL-09": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
-      "FL-10": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
-      "FL-11": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
+const btGroup1 = ["R-15686","R-15687","R-15688","R-15689","R-15690","R-15691","R-15692","R-15693"];
+const btGroup2 = ["R-15707","R-15708","R-15709","R-15710","R-15711","R-15712","R-15713","R-15714","R-15715","R-15716","R-15717","R-15718","R-15719","R-15720","R-15721","R-15765","R-16127"];
+const btGroup3 = ["R-15651","R-15652","R-15653","R-15654","R-15655","R-15656","R-15657","R-15658","R-15659","R-15660","R-15661","R-15662","R-15663"];
 
-      "FL-13": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
-      "FL-14": ["R-15686", "R-15687", "R-15688", "R-15689", "R-15690", "R-15691", "R-15692", "R-15693"],
-      "FL-15": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
-      "FL-16": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
-      "FL-17": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
-      "FL-18": ["R-15686", "R-15687", "R-15688", "R-15689", "R-15690", "R-15691", "R-15692", "R-15693"],
-      "FL-19": ["R-15686", "R-15687", "R-15688", "R-15689", "R-15690", "R-15691", "R-15692", "R-15693"],
-      "FL-20": ["R-15686", "R-15687", "R-15688", "R-15689", "R-15690", "R-15691", "R-15692", "R-15693"],
-      "FL-21": ["R-15686", "R-15687", "R-15688", "R-15689", "R-15690", "R-15691", "R-15692", "R-15693"],
-      "FL-22": ["R-15686", "R-15687", "R-15688", "R-15689", "R-15690", "R-15691", "R-15692", "R-15693"],
-      "FL-23": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
-      "FL-24": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
+/* ================= PROCESS → HOURS ================= */
+const processHourMap = {
+  "Transit G2": { g1:16, g2:16, g3:15 },
+  "Transit P-lane in G2": { g1:5, g2:5, g3:4.5 },
+  "P-lane Out G2": { g1:6, g2:6, g3:5 },
+  "Pre-Sort G2": { g1:5, g2:5, g3:4.5 },
+  "Empty G2": { g1:5, g2:5, g3:4 },
 
-      "FL-26": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
-      "FL-27": ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"],
+  "Transit G3": { g1:16, g2:16, g3:15 },
+  "Transit P-lane in G3": { g1:4.5, g2:4.5, g3:4 },
+  "P-lane Out G3": { g1:5.5, g2:5.5, g3:5 },
+  "Empty G3": { g1:5, g2:5, g3:4.5 }
+};
 
-      "FL-29": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
-      "FL-30": ["R-15686", "R-15687", "R-15688", "R-15689", "R-15690", "R-15691", "R-15692", "R-15693"],
-      "FL-32": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
-      "FL-33": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
-      "FL-34": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
-      "FL-35": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
-      "FL-36": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
-      "FL-37": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"],
-      "FL-38": ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"]
+/* ================= BREAK TIME ================= */
+const breakTimes = [
+  { start:"09:30", end:"09:40" },
+  { start:"11:30", end:"12:30" },
+  { start:"14:30", end:"14:40" },
+  { start:"16:30", end:"17:00" },
+  { start:"21:30", end:"21:40" },
+  { start:"23:30", end:"00:30" },
+  { start:"02:30", end:"02:40" },
+  { start:"04:30", end:"05:00" }
+];
 
-    };
+/* ================= LIFF ================= */
+liff.init({ liffId: LIFF_ID }).then(() => {
+  if (!liff.isLoggedIn()) liff.login();
+});
 
-    // เวลาพักเบรคปรกติ
-    const breakTimes = [
-      // กะกลางวัน
-      { start: "09:30", end: "09:40" },
-      { start: "11:30", end: "12:30" },
-      { start: "14:30", end: "14:40" },
-      { start: "16:30", end: "17:00" },
+/* ================= UTIL ================= */
+const pad = n => n.toString().padStart(2,"0");
+const formatTime = d => `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+const formatDate = d => `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}`;
+const formatThaiDate = d => {
+  const m=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+  return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()+543}`;
+};
 
-      // กะกลางคืน
-      { start: "21:30", end: "21:40" },
-      { start: "23:30", end: "00:30" },
-      { start: "02:30", end: "02:40" },
-      { start: "04:30", end: "05:00" }
-    ];
+function getSubmitDateTime(){ return new Date(); }
 
-    /* ================= LIFF INIT ================= */
-    liff.init({ liffId: LIFF_ID }).then(() => {
-      if (!liff.isLoggedIn()) {
-        liff.login();
-      }
-    });
+/* ================= LOGIC ================= */
+function isBreakTime(date){
+  const min=date.getHours()*60+date.getMinutes();
+  return breakTimes.some(b=>{
+    const [sh,sm]=b.start.split(":").map(Number);
+    const [eh,em]=b.end.split(":").map(Number);
+    const s=sh*60+sm,e=eh*60+em;
+    return s>e ? min>=s||min<e : min>=s&&min<e;
+  });
+}
 
-    /* ============ Utility Date/Time ============ */
-    function pad(num) {
-      return num.toString().padStart(2, '0');
-    }
+function addWorkingHours(start,h){
+  let cur=new Date(start),min=h*60;
+  while(min>0){
+    cur.setMinutes(cur.getMinutes()+1);
+    if(!isBreakTime(cur)) min--;
+  }
+  return cur;
+}
 
-    /* ============ Change Format Date ============ */
-    function formatDate(d) {
-      return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())}`;
-    }
+function getChangeDateTime(submit){
+  const p=processNo.value, fl=flNumber.value;
+  if(!p||!fl) return null;
 
-    /* ============ Change Format Time ============ */
-    function formatTime(d) {
-      return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-    }
+  let g=null;
+  if(flGroup1.includes(fl)) g="g1";
+  else if(flGroup2.includes(fl)) g="g2";
+  else if(flGroup3.includes(fl)) g="g3";
 
-    function formatThaiDate(d) {
-      const months = [
-        "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน",
-        "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม",
-        "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
-      ];
+  const h=processHourMap[p]?.[g];
+  if(!h) return null;
 
-      const day = d.getDate();
-      const month = months[d.getMonth()];
-      const year = d.getFullYear() + 543;
+  return addWorkingHours(submit,h);
+}
 
-      return `${day} ${month} ${year}`;
-    }
+function updateBT(){
+  const fl=flNumber.value, bt=btNumber;
+  bt.innerHTML='<option value="">-- เลือก Battery --</option>';
 
-    function getSubmitDateTime() {
-      return new Date(); // เวลาปัจจุบัน
-    }
+  let list=[];
+  if(flGroup1.includes(fl)) list=btGroup1;
+  else if(flGroup2.includes(fl)) list=btGroup2;
+  else if(flGroup3.includes(fl)) list=btGroup3;
 
-    /* ============ ฟังก์ชัน Preview เวลา (เรียกตอนเปลี่ยน Process) ============ */
-    function previewChangeTime() {
-      const display = document.getElementById("changeDateTime");
+  list.forEach(b=>bt.innerHTML+=`<option>${b}</option>`);
+  previewChangeTime();
+}
 
-      if (!processNo.value) {
-        display.textContent = "กรุณาเลือก Process";
-        return;
-      }
+function previewChangeTime(){
+  const box=document.getElementById("changeDateTime");
+  if(!processNo.value){ box.textContent="กรุณาเลือก Process"; return; }
+  if(!flNumber.value){ box.textContent="กรุณาเลือก Forklift"; return; }
 
-      const submitDate = getSubmitDateTime();
-      const changeDate = getChangeDateTime(submitDate);
+  const d=getChangeDateTime(getSubmitDateTime());
+  if(!d){ box.textContent="-"; return; }
 
-      if (!changeDate) {
-        display.textContent = "-";
-        return;
-      }
+  box.innerHTML=`📅 ${formatThaiDate(d)}<br>⏰ ${formatTime(d)}`;
+}
 
-      display.innerHTML = `
-    📅 ${formatThaiDate(changeDate)}
-    <br>
-    ⏰ ${formatTime(changeDate)}
-  `;
-    }
+/* ================= INIT FL ================= */
+for(let i=1;i<=40;i++){
+  const f=`FL-${String(i).padStart(2,"0")}`;
+  flNumber.innerHTML+=`<option>${f}</option>`;
+}
 
-    /* ============ ฟังก์ชันเช็คว่าเวลาพักเบรค ============ */
-    function isBreakTime(date) {
-      const minutes = date.getHours() * 60 + date.getMinutes();
+/* ================= SUBMIT ================= */
+function submitForm(){
+  if(!processNo.value||!flNumber.value||!btNumber.value){
+    alert("กรุณาเลือกข้อมูลให้ครบ");
+    return;
+  }
 
-      return breakTimes.some(b => {
-        const [sh, sm] = b.start.split(":").map(Number);
-        const [eh, em] = b.end.split(":").map(Number);
-
-        const startMin = sh * 60 + sm;
-        const endMin = eh * 60 + em;
-
-        // กรณีข้ามวัน (เช่น 23:30 - 00:30)
-        if (startMin > endMin) {
-          return minutes >= startMin || minutes < endMin;
-        }
-
-        return minutes >= startMin && minutes < endMin;
-      });
-    }
-
-    /* ============ ฟังก์ชันบวกว่าเวลาพักเบรค ============ */
-    function addWorkingHours(startDate, hoursToAdd) {
-      let current = new Date(startDate);
-      let minutesLeft = hoursToAdd * 60;
-
-      while (minutesLeft > 0) {
-        current.setMinutes(current.getMinutes() + 1);
-
-        // ถ้าไม่ใช่เวลาพัก → นับ
-        if (!isBreakTime(current)) {
-          minutesLeft--;
-        }
-      }
-
-      return current;
-    }
-
-    /* ============ ฟังก์ชันคำนวนเวลาเปลี่ยน Bat ครั้งถัดไป ============ */
-    function getChangeDateTime(submitDate) {
-      const processNo = document.getElementById("processNo").value;
-
-      if (!processNo) return null;
-
-      let addHours = 0;
-
-      switch (processNo) {
-        case "Transit":
-          addHours = 16;
-          break;
-
-        case "P-Lane In":
-          addHours = 4;
-          break;
-
-        case "P-Lane Out":
-          addHours = 6;
-          break;
-
-        case "Pre-Sort":
-          addHours = 5;
-          break;
-
-        case "Empty":
-          addHours = 5;
-          break;
-      }
-
-      return addWorkingHours(submitDate, addHours);
-    }
-
-    const select = document.getElementById("flNumber");
-    for (let i = 1; i <= 40; i++) {
-      const fl = `FL-${String(i).padStart(2, "0")}`;
-      select.innerHTML += `<option value="${fl}">${fl}</option>`;
-    }
-
-    /* ============ Update BT Dropdown ============ */
-    function updateBT() {
-      const fl = document.getElementById("flNumber").value;
-      const btSelect = document.getElementById("btNumber");
-
-      btSelect.innerHTML = '<option value="">-- เลือก แบตเตอรี่ --</option>';
-
-      if (btMap[fl]) {
-        btMap[fl].forEach(bt => {
-          const opt = document.createElement("option");
-          opt.value = bt;
-          opt.textContent = bt;
-          btSelect.appendChild(opt);
-        });
-      }
-
-      previewChangeTime();
-    }
-
-
-    /* ================= Submit ================= */
-    function submitForm() {
-
-      if (!processNo.value) {
-        alert("กรุณาเลือก Process No");
-        return;
-      }
-      if (!flNumber.value) {
-        alert("กรุณาเลือก Forklift No");
-        return;
-      }
-      if (!btNumber.value) {
-        alert("กรุณาเลือก Battery No");
-        return;
-      }
-
-      const submitDate = getSubmitDateTime();
-      const changeDate = getChangeDateTime(submitDate);
-
-      const data = {
-        userId: liff.getContext().userId,
-        processNo: processNo.value,
-        flNumber: flNumber.value,
-        btNumber: btNumber.value,
-
-        DateSubmit: formatDate(submitDate),
-        TimeSubmit: formatTime(submitDate),
-
-        DateChange: formatDate(changeDate),
-        TimeChange: formatTime(changeDate)
-      };
-
-      fetch(FLOW_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      }).then(() => {
-        alert("บันทึกข้อมูลเรียบร้อย");
-        liff.closeWindow();
-      });
-    }
-
-  </script>
-
+  const s=getSubmitDateTime(), c=getChangeDateTime(s);
+  fetch(FLOW_URL,{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({
+      userId:liff.getContext().userId,
+      processNo:processNo.value,
+      flNumber:flNumber.value,
+      btNumber:btNumber.value,
+      DateSubmit:formatDate(s),
+      TimeSubmit:formatTime(s),
+      DateChange:formatDate(c),
+      TimeChange:formatTime(c)
+    })
+  }).then(()=>{ alert("บันทึกเรียบร้อย"); liff.closeWindow(); });
+}
+</script>
 </body>
-
 </html>
