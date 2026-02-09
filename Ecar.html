@@ -222,6 +222,8 @@
     📅 ${formatThaiDate(changeDate)}
     <br>
     ⏰ ${formatTime(changeDate)}
+    <br>
+    ⏳ ใช้เวลา ${addHours} ชั่วโมง
   `;
         }
 
@@ -263,33 +265,53 @@
         }
 
         /* ============ ฟังก์ชันคำนวนเวลาเปลี่ยน Bat ครั้งถัดไป ============ */
-        function getChangeDateTime(submitDate) {
-            const processNo = document.getElementById("processNo").value;
+        // function getChangeDateTime(submitDate) {
+        //     const processNo = document.getElementById("processNo").value;
 
-            if (!processNo) return null;
+        //     if (!processNo) return null;
+
+        //     let addHours = 0;
+
+        //     switch (processNo) {
+        //         case "TL Back up":
+        //             addHours = 7;
+        //             break;
+
+        //         case "Supply KanBan":
+        //             addHours = 7;
+        //             break;
+
+        //         case "Supply SEQ":
+        //             addHours = 7;
+        //             break;
+
+        //         case "Supply Big Part":
+        //             addHours = 7;
+        //             break;
+        //     }
+
+        //     return addWorkingHours(submitDate, addHours);
+        // }
+
+        function getChangeDateTime(submitDate) {
+            const fl = document.getElementById("flNumber").value;
+            if (!fl) return null;
 
             let addHours = 0;
 
-            switch (processNo) {
-                case "TL Back up":
-                    addHours = 7;
-                    break;
-
-                case "Supply KanBan":
-                    addHours = 7;
-                    break;
-
-                case "Supply SEQ":
-                    addHours = 7;
-                    break;
-
-                case "Supply Big Part":
-                    addHours = 7;
-                    break;
+            if (ecGroup1.includes(fl)) {
+                addHours = 7;
+            } else if (ecGroup2.includes(fl)) {
+                addHours = 5;
+            } else {
+                return null; // เผื่อกรณี EC ไม่อยู่ในกลุ่ม
             }
 
             return addWorkingHours(submitDate, addHours);
         }
+
+
+
 
         /* ================= Submit ================= */
         function submitForm() {
@@ -338,4 +360,3 @@
 </body>
 
 </html>
-
