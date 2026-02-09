@@ -1,222 +1,371 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Forklift Battery Replacement</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Car Battery Replacement</title>
 
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <!-- LIFF SDK -->
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 16px;
-      background: #f5f5f5;
-    }
-    h3 { text-align: center; }
-    label {
-      display: block;
-      margin-top: 12px;
-      font-weight: bold;
-    }
-    select, button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 6px;
-      font-size: 16px;
-    }
-    button {
-      margin-top: 20px;
-      background: #06c755;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-    }
-  </style>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 16px;
+            background: #f5f5f5;
+        }
+
+        h3 {
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-top: 12px;
+            font-weight: bold;
+        }
+
+        select,
+        button {
+            width: 100%;
+            padding: 12px;
+            margin-top: 6px;
+            font-size: 16px;
+        }
+
+        button {
+            margin-top: 20px;
+            background: #06c755;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+        }
+    </style>
 </head>
 
 <body>
 
-<h3>เปลี่ยนแบตรถ Forklift</h3>
+    <h3>เปลี่ยนแบตรถ E-Car</h3>
 
-<label>Process No</label>
-<select id="processNo" onchange="previewChangeTime()">
-  <option value="">-- เลือก Process --</option>
+    <label>Process No</label>
+    <select id="processNo" onchange="previewChangeTime()">
+        <option value="">-- เลือก Process --</option>
+        <option value="TL Back up">TL Back up</option>
+        <option value="Supply KanBan">Supply Kanban</option>
+        <option value="Supply SEQ">Supply Big Part</option>
+        <option value="Supply Big Part">Supply Import Part</option>
+    </select>
 
-  <option value="Transit G2">Transit G2</option>
-  <option value="Transit P-lane in G2">Transit P-lane in G2</option>
-  <option value="P-lane Out G2">P-lane Out G2</option>
-  <option value="Pre-Sort G2">Pre-Sort G2</option>
-  <option value="Empty G2">Empty G2</option>
+    <label>E-Car No</label>
+    <select id="flNumber" onchange="updateBT()">
+        <option value="">-- เลือก อีคาร์ --</option>
+    </select>
 
-  <option value="Transit G3">Transit G3</option>
-  <option value="Transit P-lane in G3">Transit P-lane in G3</option>
-  <option value="P-lane Out G3">P-lane Out G3</option>
-  <option value="Empty G3">Empty G3</option>
-</select>
 
-<label>Forklift No</label>
-<select id="flNumber" onchange="updateBT()">
-  <option value="">-- เลือก Forklift --</option>
-</select>
+    <label>Battery No</label>
+    <select id="btNumber" onchange="previewChangeTime()">
+        <option value="">-- เลือก แบตเตอรี่ --</option>
+    </select>
 
-<label>Battery No</label>
-<select id="btNumber" onchange="previewChangeTime()">
-  <option value="">-- เลือก Battery --</option>
-</select>
+    <label>เวลาเปลี่ยนแบตครั้งถัดไป</label>
+    <div id="changeDateTime" style="margin-top:6px;padding:12px;background:#fff;border-radius:6px;
+              font-size:16px;color:#333;">
+        กรุณาเลือก Process
+    </div>
 
-<label>เวลาเปลี่ยนแบตครั้งถัดไป</label>
-<div id="changeDateTime"
-     style="margin-top:6px;padding:12px;background:#fff;border-radius:6px;font-size:16px;">
-  กรุณาเลือก Process
-</div>
+    <button onclick="submitForm()">บันทึกข้อมูล</button>
 
-<button onclick="submitForm()">บันทึกข้อมูล</button>
+    <script>
+        /* ================= CONFIG ================= */
+        const LIFF_ID = "2008917250-9DBfUEEy";
+        const FLOW_URL = "https://defaultd9cd485e39bd4cc995398c97631fbb.71.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/6195382cbe7940ccb47ec0b364f02c8b/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=LOAM7JCklNTPQbiVkRekzwQFxFiQ32bUtKrMf7Vb5Pc";
 
-<script>
-/* ================= CONFIG ================= */
-const LIFF_ID = "2008917250-2HZ9qo2C";
-const FLOW_URL = "https://defaultd9cd485e39bd4cc995398c97631fbb.71.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/6195382cbe7940ccb47ec0b364f02c8b/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=LOAM7JCklNTPQbiVkRekzwQFxFiQ32bUtKrMf7Vb5Pc";
+        /* ============ FL → BT Mapping ============ */
 
-/* ================= FL / BT GROUP ================= */
-const flGroup1 = ["FL-14","FL-18","FL-19","FL-20","FL-21","FL-22","FL-30"];
-const flGroup2 = ["FL-01","FL-02","FL-04","FL-05","FL-06","FL-07","FL-08","FL-09","FL-16","FL-23","FL-24","FL-26","FL-27","FL-15","FL-17"];
-const flGroup3 = ["FL-10","FL-11","FL-13","FL-29","FL-32","FL-33","FL-34","FL-35","FL-36","FL-37","FL-38"];
+        /* ===== EC Groups ===== */
+        const ecGroup1 = [
+            "EC-01", "EC-07", "EC-19", "EC-24", "EC-37", "EC-38", "EC-39", "EC-40",
+            "EC-41", "EC-42", "EC-43", "EC-44", "EC-45", "EC-46", "EC-47", "EC-48",
+            "EC-49", "EC-50", "EC-51", "EC-52", "EC-53", "EC-54"
+        ];
 
-const btGroup1 = ["R-15686","R-15687","R-15688","R-15689","R-15690","R-15691","R-15692","R-15693"];
-const btGroup2 = ["R-15707","R-15708","R-15709","R-15710","R-15711","R-15712","R-15713","R-15714","R-15715","R-15716","R-15717","R-15718","R-15719","R-15720","R-15721","R-15765","R-16127"];
-const btGroup3 = ["R-15651","R-15652","R-15653","R-15654","R-15655","R-15656","R-15657","R-15658","R-15659","R-15660","R-15661","R-15662","R-15663"];
+        const ecGroup2 = [
+            "EC-06", "EC-08", "EC-11", "EC-12", "EC-15", "EC-17", "EC-22", "EC-25",
+            "EC-29", "EC-31", "EC-32", "EC-35", "EC-41", "EC-60"
+        ];
 
-/* ================= PROCESS → HOURS ================= */
-const processHourMap = {
-  "Transit G2": { g1:16, g2:16, g3:15 },
-  "Transit P-lane in G2": { g1:5, g2:5, g3:4.5 },
-  "P-lane Out G2": { g1:6, g2:6, g3:5 },
-  "Pre-Sort G2": { g1:5, g2:5, g3:4.5 },
-  "Empty G2": { g1:5, g2:5, g3:4 },
+        const ecBtGroup1 = [
+            "R-15600", "R-15601", "R-15602", "R-15603", "R-15604", "R-15605", "R-15606",
+            "R-15607", "R-15608", "R-15609", "R-15610", "R-15611", "R-15612", "R-15613",
+            "R-15614", "R-15615", "R-15616", "R-15617", "R-15618", "R-15619", "R-15620",
+            "R-15621", "R-15622", "R-15623", "R-15624"
+        ];
 
-  "Transit G3": { g1:16, g2:16, g3:15 },
-  "Transit P-lane in G3": { g1:4.5, g2:4.5, g3:4 },
-  "P-lane Out G3": { g1:5.5, g2:5.5, g3:5 },
-  "Empty G3": { g1:5, g2:5, g3:4.5 }
-};
+        const ecBtGroup2 = [
+            "R-15454", "R-15455", "R-15456", "R-15457", "R-15458", "R-15459", "R-15460",
+            "R-15461", "R-15462", "R-15463", "R-15464", "R-15465", "R-15466", "R-15467",
+            "R-15468", "R-15469", "R-15470", "R-15471", "R-15472", "R-15473", "R-15474",
+            "R-15475", "R-15476", "R-15477", "R-15483", "R-15501", "R-15499",
+            "R-15485", "R-15488", "R-15519"
+        ];
 
-/* ================= BREAK TIME ================= */
-const breakTimes = [
-  { start:"09:30", end:"09:40" },
-  { start:"11:30", end:"12:30" },
-  { start:"14:30", end:"14:40" },
-  { start:"16:30", end:"17:00" },
-  { start:"21:30", end:"21:40" },
-  { start:"23:30", end:"00:30" },
-  { start:"02:30", end:"02:40" },
-  { start:"04:30", end:"05:00" }
-];
+        /* ===== เติม EC ลง flNumber ===== */
+        const flSelect = document.getElementById("flNumber");
+        const allEC = [...new Set([...ecGroup1, ...ecGroup2])];
 
-/* ================= LIFF ================= */
-liff.init({ liffId: LIFF_ID }).then(() => {
-  if (!liff.isLoggedIn()) liff.login();
-});
+        allEC.forEach(ec => {
+            const opt = document.createElement("option");
+            opt.value = ec;
+            opt.textContent = ec;
+            flSelect.appendChild(opt);
+        });
 
-/* ================= UTIL ================= */
-const pad = n => n.toString().padStart(2,"0");
-const formatTime = d => `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-const formatDate = d => `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}`;
-const formatThaiDate = d => {
-  const m=["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
-  return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()+543}`;
-};
+        /* ===== Update BT ===== */
+        function updateBT() {
+            const fl = flSelect.value;
+            const btSelect = document.getElementById("btNumber");
 
-function getSubmitDateTime(){ return new Date(); }
+            btSelect.innerHTML = '<option value="">-- เลือก แบตเตอรี่ --</option>';
 
-/* ================= LOGIC ================= */
-function isBreakTime(date){
-  const min=date.getHours()*60+date.getMinutes();
-  return breakTimes.some(b=>{
-    const [sh,sm]=b.start.split(":").map(Number);
-    const [eh,em]=b.end.split(":").map(Number);
-    const s=sh*60+sm,e=eh*60+em;
-    return s>e ? min>=s||min<e : min>=s&&min<e;
-  });
-}
+            let btList = [];
 
-function addWorkingHours(start,h){
-  let cur=new Date(start),min=h*60;
-  while(min>0){
-    cur.setMinutes(cur.getMinutes()+1);
-    if(!isBreakTime(cur)) min--;
-  }
-  return cur;
-}
+            if (ecGroup1.includes(fl)) {
+                btList = ecBtGroup1;
+            } else if (ecGroup2.includes(fl)) {
+                btList = ecBtGroup2;
+            }
 
-function getChangeDateTime(submit){
-  const p=processNo.value, fl=flNumber.value;
-  if(!p||!fl) return null;
+            btList.forEach(bt => {
+                const opt = document.createElement("option");
+                opt.value = bt;
+                opt.textContent = bt;
+                btSelect.appendChild(opt);
+            });
 
-  let g=null;
-  if(flGroup1.includes(fl)) g="g1";
-  else if(flGroup2.includes(fl)) g="g2";
-  else if(flGroup3.includes(fl)) g="g3";
+            previewChangeTime();
+        }
 
-  const h=processHourMap[p]?.[g];
-  if(!h) return null;
+        // เวลาพักเบรคปรกติ
+        const breakTimes = [
+            // กะกลางวัน
+            { start: "09:30", end: "09:40" },
+            { start: "11:30", end: "12:30" },
+            { start: "14:30", end: "14:40" },
+            { start: "16:30", end: "17:00" },
 
-  return addWorkingHours(submit,h);
-}
+            // กะกลางคืน
+            { start: "21:30", end: "21:40" },
+            { start: "23:30", end: "00:30" },
+            { start: "02:30", end: "02:40" },
+            { start: "04:30", end: "05:00" }
+        ];
 
-function updateBT(){
-  const fl=flNumber.value, bt=btNumber;
-  bt.innerHTML='<option value="">-- เลือก Battery --</option>';
+        /* ================= LIFF INIT ================= */
+        liff.init({ liffId: LIFF_ID }).then(() => {
+            if (!liff.isLoggedIn()) {
+                liff.login();
+            }
+        });
 
-  let list=[];
-  if(flGroup1.includes(fl)) list=btGroup1;
-  else if(flGroup2.includes(fl)) list=btGroup2;
-  else if(flGroup3.includes(fl)) list=btGroup3;
+        /* ============ Utility Date/Time ============ */
+        function pad(num) {
+            return num.toString().padStart(2, '0');
+        }
 
-  list.forEach(b=>bt.innerHTML+=`<option>${b}</option>`);
-  previewChangeTime();
-}
+        /* ============ Change Format Date ============ */
+        function formatDate(d) {
+            return `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())}`;
+        }
 
-function previewChangeTime(){
-  const box=document.getElementById("changeDateTime");
-  if(!processNo.value){ box.textContent="กรุณาเลือก Process"; return; }
-  if(!flNumber.value){ box.textContent="กรุณาเลือก Forklift"; return; }
+        /* ============ Change Format Time ============ */
+        function formatTime(d) {
+            return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+        }
 
-  const d=getChangeDateTime(getSubmitDateTime());
-  if(!d){ box.textContent="-"; return; }
+        function formatThaiDate(d) {
+            const months = [
+                "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน",
+                "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม",
+                "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+            ];
 
-  box.innerHTML=`📅 ${formatThaiDate(d)}<br>⏰ ${formatTime(d)}`;
-}
+            const day = d.getDate();
+            const month = months[d.getMonth()];
+            const year = d.getFullYear() + 543;
 
-/* ================= INIT FL ================= */
-for(let i=1;i<=40;i++){
-  const f=`FL-${String(i).padStart(2,"0")}`;
-  flNumber.innerHTML+=`<option>${f}</option>`;
-}
+            return `${day} ${month} ${year}`;
+        }
 
-/* ================= SUBMIT ================= */
-function submitForm(){
-  if(!processNo.value||!flNumber.value||!btNumber.value){
-    alert("กรุณาเลือกข้อมูลให้ครบ");
-    return;
-  }
+        function getSubmitDateTime() {
+            return new Date(); // เวลาปัจจุบัน
+        }
 
-  const s=getSubmitDateTime(), c=getChangeDateTime(s);
-  fetch(FLOW_URL,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({
-      userId:liff.getContext().userId,
-      processNo:processNo.value,
-      flNumber:flNumber.value,
-      btNumber:btNumber.value,
-      DateSubmit:formatDate(s),
-      TimeSubmit:formatTime(s),
-      DateChange:formatDate(c),
-      TimeChange:formatTime(c)
-    })
-  }).then(()=>{ alert("บันทึกเรียบร้อย"); liff.closeWindow(); });
-}
-</script>
+        /* ============ ฟังก์ชัน Preview เวลา (เรียกตอนเปลี่ยน Process) ============ */
+        function previewChangeTime() {
+            const box = document.getElementById("changeDateTime");
+
+            if (!processNo.value) {
+                box.textContent = "กรุณาเลือก Process";
+                return;
+            }
+            if (!flNumber.value) {
+                box.textContent = "กรุณาเลือก Forklift";
+                return;
+            }
+
+            const submitDate = getSubmitDateTime();
+            const changeDate = getChangeDateTime(submitDate);
+            if (!changeDate) {
+                box.textContent = "-";
+                return;
+            }
+
+            // หา FL group
+            let groupKey = null;
+            if (flGroup1.includes(flNumber.value)) groupKey = "g1";
+            else if (flGroup2.includes(flNumber.value)) groupKey = "g2";
+            else if (flGroup3.includes(flNumber.value)) groupKey = "g3";
+
+            // ชั่วโมงที่ใช้
+            const addHours = processHourMap[processNo.value][groupKey];
+
+            box.innerHTML = `
+    📅 ${formatThaiDate(changeDate)}<br>
+    ⏰ ${formatTime(changeDate)}<br>
+    ⏳ ใช้เวลา ${addHours} ชั่วโมง
+  `;
+        }
+
+
+
+        /* ============ ฟังก์ชันเช็คว่าเวลาพักเบรค ============ */
+        function isBreakTime(date) {
+            const minutes = date.getHours() * 60 + date.getMinutes();
+
+            return breakTimes.some(b => {
+                const [sh, sm] = b.start.split(":").map(Number);
+                const [eh, em] = b.end.split(":").map(Number);
+
+                const startMin = sh * 60 + sm;
+                const endMin = eh * 60 + em;
+
+                // กรณีข้ามวัน (เช่น 23:30 - 00:30)
+                if (startMin > endMin) {
+                    return minutes >= startMin || minutes < endMin;
+                }
+
+                return minutes >= startMin && minutes < endMin;
+            });
+        }
+
+        /* ============ ฟังก์ชันบวกว่าเวลาพักเบรค ============ */
+        function addWorkingHours(startDate, hoursToAdd) {
+            let current = new Date(startDate);
+            let minutesLeft = hoursToAdd * 60;
+
+            while (minutesLeft > 0) {
+                current.setMinutes(current.getMinutes() + 1);
+
+                // ถ้าไม่ใช่เวลาพัก → นับ
+                if (!isBreakTime(current)) {
+                    minutesLeft--;
+                }
+            }
+
+            return current;
+        }
+
+        /* ============ ฟังก์ชันคำนวนเวลาเปลี่ยน Bat ครั้งถัดไป ============ */
+        // function getChangeDateTime(submitDate) {
+        //     const processNo = document.getElementById("processNo").value;
+
+        //     if (!processNo) return null;
+
+        //     let addHours = 0;
+
+        //     switch (processNo) {
+        //         case "TL Back up":
+        //             addHours = 7;
+        //             break;
+
+        //         case "Supply KanBan":
+        //             addHours = 7;
+        //             break;
+
+        //         case "Supply SEQ":
+        //             addHours = 7;
+        //             break;
+
+        //         case "Supply Big Part":
+        //             addHours = 7;
+        //             break;
+        //     }
+
+        //     return addWorkingHours(submitDate, addHours);
+        // }
+
+        function getChangeDateTime(submitDate) {
+            const fl = document.getElementById("flNumber").value;
+            if (!fl) return null;
+
+            let addHours = 0;
+
+            if (ecGroup1.includes(fl)) {
+                addHours = 7;
+            } else if (ecGroup2.includes(fl)) {
+                addHours = 5;
+            } else {
+                return null; // เผื่อกรณี EC ไม่อยู่ในกลุ่ม
+            }
+
+            return addWorkingHours(submitDate, addHours);
+        }
+
+        /* ================= Submit ================= */
+        function submitForm() {
+
+            if (!processNo.value) {
+                alert("กรุณาเลือก Process No");
+                return;
+            }
+            if (!flNumber.value) {
+                alert("กรุณาเลือก E-Car No");
+                return;
+            }
+            if (!btNumber.value) {
+                alert("กรุณาเลือก Battery No");
+                return;
+            }
+
+            const submitDate = getSubmitDateTime();
+            const changeDate = getChangeDateTime(submitDate);
+
+            const data = {
+                userId: liff.getContext().userId,
+                processNo: processNo.value,
+                flNumber: flNumber.value,
+                btNumber: btNumber.value,
+
+                DateSubmit: formatDate(submitDate),
+                TimeSubmit: formatTime(submitDate),
+
+                DateChange: formatDate(changeDate),
+                TimeChange: formatTime(changeDate)
+            };
+
+            fetch(FLOW_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(data)
+            }).then(() => {
+                alert("บันทึกข้อมูลเรียบร้อย");
+                liff.closeWindow();
+            });
+        }
+
+    </script>
+
 </body>
+
 </html>
