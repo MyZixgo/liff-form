@@ -204,9 +204,16 @@
         /* ============ ฟังก์ชัน Preview เวลา (เรียกตอนเปลี่ยน Process) ============ */
         function previewChangeTime() {
             const display = document.getElementById("changeDateTime");
+            const process = document.getElementById("processNo").value;
+            const fl = document.getElementById("flNumber").value;
 
-            if (!processNo.value) {
+            if (!process) {
                 display.textContent = "กรุณาเลือก Process";
+                return;
+            }
+
+            if (!fl) {
+                display.textContent = "กรุณาเลือก E-Car No";
                 return;
             }
 
@@ -218,14 +225,18 @@
                 return;
             }
 
+            // หา addHours เพื่อใช้แสดงผล
+            let addHours = "-";
+            if (ecGroup1.includes(fl)) addHours = 7;
+            else if (ecGroup2.includes(fl)) addHours = 5;
+
             display.innerHTML = `
-    📅 ${formatThaiDate(changeDate)}
-    <br>
-    ⏰ ${formatTime(changeDate)}
-    <br>
-    ⏳ ใช้เวลา ${addHours} ชั่วโมง
-  `;
+        📅 ${formatThaiDate(changeDate)}<br>
+        ⏰ ${formatTime(changeDate)}<br>
+        ⏳ ใช้เวลา ${addHours} ชั่วโมง
+    `;
         }
+
 
         /* ============ ฟังก์ชันเช็คว่าเวลาพักเบรค ============ */
         function isBreakTime(date) {
