@@ -85,29 +85,25 @@
 
         /* ===== EC Groups ===== */
         const ecGroup1 = [
-            "EC-01", "EC-07", "EC-19", "EC-24", "EC-37", "EC-38", "EC-39", "EC-40",
-            "EC-41", "EC-42", "EC-43", "EC-44", "EC-45", "EC-46", "EC-47", "EC-48",
-            "EC-49", "EC-50", "EC-51", "EC-52", "EC-53", "EC-54"
+            "EC-01", "EC-07", "EC-09", "EC-19", "EC-24", "EC-37", "EC-38", "EC-39", "EC-40", "EC-42", "EC-43", 
+            "EC-44", "EC-45", "EC-46", "EC-47", "EC-48", "EC-49", "EC-50", "EC-51", "EC-52", "EC-53", "EC-54", "EC-77"
         ];
 
         const ecGroup2 = [
-            "EC-06", "EC-08", "EC-11", "EC-12", "EC-15", "EC-17", "EC-22", "EC-25",
-            "EC-29", "EC-31", "EC-32", "EC-35", "EC-41", "EC-60"
+            "EC-06", "EC-08", "EC-11", "EC-12", "EC-15", "EC-17", "EC-22", "EC-25", "EC-29", "EC-31", "EC-32", "EC-35", "EC-41",
+             "EC-60"
         ];
-        
+
         const ecBtGroup1 = [
-            "R-15454", "R-15455", "R-15456", "R-15457", "R-15458", "R-15459", "R-15460",
-            "R-15461", "R-15462", "R-15463", "R-15464", "R-15465", "R-15466", "R-15467",
-            "R-15468", "R-15469", "R-15470", "R-15471", "R-15472", "R-15473", "R-15474",
-            "R-15475", "R-15476", "R-15477", "R-15483", "R-15501", "R-15499",
-            "R-15485", "R-15488", "R-15519"
+            "R-15454", "R-15455", "R-15456", "R-15457", "R-15458", "R-15459", "R-15460", "R-15461", "R-15462", "R-15463", "R-15464", 
+            "R-15465", "R-15466", "R-15467", "R-15468", "R-15469", "R-15470", "R-15471", "R-15472", "R-15473", "R-15474", "R-15475", 
+            "R-15476", "R-15477", "R-15483", "R-15501", "R-15499", "R-15485", "R-15488", "R-15519"
         ];
-        
+
         const ecBtGroup2 = [
-            "R-15600", "R-15601", "R-15602", "R-15603", "R-15604", "R-15605", "R-15606",
-            "R-15607", "R-15608", "R-15609", "R-15610", "R-15611", "R-15612", "R-15613",
-            "R-15614", "R-15615", "R-15616", "R-15617", "R-15618", "R-15619", "R-15620",
-            "R-15621", "R-15622", "R-15623", "R-15624"
+            "R-15600", "R-15601", "R-15602", "R-15603", "R-15604", "R-15605", "R-15606", "R-15607", "R-15608", "R-15609", "R-15610",
+            "R-15611", "R-15612", "R-15613", "R-15614", "R-15615", "R-15616", "R-15617", "R-15618", "R-15619", "R-15620", "R-15621", 
+            "R-15622", "R-15623", "R-15624"
         ];
 
         /* ===== เติม EC ลง flNumber ===== */
@@ -203,39 +199,40 @@
 
         /* ============ ฟังก์ชัน Preview เวลา (เรียกตอนเปลี่ยน Process) ============ */
         function previewChangeTime() {
-            const display = document.getElementById("changeDateTime");
-            const process = document.getElementById("processNo").value;
-            const fl = document.getElementById("flNumber").value;
+            const box = document.getElementById("changeDateTime");
 
-            if (!process) {
-                display.textContent = "กรุณาเลือก Process";
+            if (!processNo.value) {
+                box.textContent = "กรุณาเลือก Process";
                 return;
             }
-
-            if (!fl) {
-                display.textContent = "กรุณาเลือก E-Car No";
+            if (!flNumber.value) {
+                box.textContent = "กรุณาเลือก Forklift";
                 return;
             }
 
             const submitDate = getSubmitDateTime();
             const changeDate = getChangeDateTime(submitDate);
-
             if (!changeDate) {
-                display.textContent = "-";
+                box.textContent = "-";
                 return;
             }
 
-            // หา addHours เพื่อใช้แสดงผล
-            let addHours = "-";
-            if (ecGroup1.includes(fl)) addHours = 7;
-            else if (ecGroup2.includes(fl)) addHours = 5;
+            // หา FL group
+            let groupKey = null;
+            if (flGroup1.includes(flNumber.value)) groupKey = "g1";
+            else if (flGroup2.includes(flNumber.value)) groupKey = "g2";
+            else if (flGroup3.includes(flNumber.value)) groupKey = "g3";
 
-            display.innerHTML = `
-        📅 ${formatThaiDate(changeDate)}<br>
-        ⏰ ${formatTime(changeDate)}<br>
-        ⏳ ใช้เวลา ${addHours} ชั่วโมง
-    `;
+            // ชั่วโมงที่ใช้
+            const addHours = processHourMap[processNo.value][groupKey];
+
+            box.innerHTML = `
+    📅 ${formatThaiDate(changeDate)}<br>
+    ⏰ ${formatTime(changeDate)}<br>
+    ⏳ ใช้เวลา ${addHours} ชั่วโมง
+  `;
         }
+
 
 
         /* ============ ฟังก์ชันเช็คว่าเวลาพักเบรค ============ */
@@ -321,9 +318,6 @@
             return addWorkingHours(submitDate, addHours);
         }
 
-
-
-
         /* ================= Submit ================= */
         function submitForm() {
 
@@ -371,4 +365,3 @@
 </body>
 
 </html>
-
