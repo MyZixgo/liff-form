@@ -1,174 +1,232 @@
-<script>
-/* ================= CONFIG ================= */
-const LIFF_ID = "2008917250-2HZ9qo2C";
-const FLOW_URL = "YOUR_FLOW_URL";
+<!DOCTYPE html>
+<html lang="th">
 
-/* ================= FL / BT GROUP ================= */
-const flGroup1 = ["FL-14","FL-18","FL-19","FL-20","FL-21","FL-22","FL-30"];
-const flGroup2 = ["FL-01","FL-02","FL-04","FL-05","FL-06","FL-07","FL-08","FL-09","FL-16","FL-23","FL-24","FL-26","FL-27","FL-15","FL-17"];
-const flGroup3 = ["FL-10","FL-11","FL-13","FL-29","FL-32","FL-33","FL-34","FL-35","FL-36","FL-37","FL-38"];
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forklift Battery Replacement</title>
 
-const btGroup1 = ["R-15686","R-15687","R-15688","R-15689","R-15690","R-15691","R-15692","R-15693"];
-const btGroup2 = ["R-15707","R-15708","R-15709","R-15710","R-15711","R-15712","R-15713","R-15714","R-15715","R-15716","R-15717","R-15718","R-15719","R-15720","R-15721","R-15765","R-16127"];
-const btGroup3 = ["R-15651","R-15652","R-15653","R-15654","R-15655","R-15656","R-15657","R-15658","R-15659","R-15660","R-15661","R-15662","R-15663"];
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
-/* ================= PROCESS → HOURS ================= */
-const processHourMap = {
-  "Transit G2": { g1:16,g2:16,g3:15 },
-  "Transit P-lane in G2": { g1:5,g2:5,g3:4.5 },
-  "P-lane Out G2": { g1:6,g2:6,g3:5 },
-  "Pre-Sort G2": { g1:5,g2:5,g3:4.5 },
-  "Empty G2": { g1:5,g2:5,g3:4 },
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 16px;
+      background: #f5f5f5;
+    }
 
-  "Transit G3": { g1:16,g2:16,g3:15 },
-  "Transit P-lane in G3": { g1:4.5,g2:4.5,g3:4 },
-  "P-lane Out G3": { g1:5.5,g2:5.5,g3:5 },
-  "Empty G3": { g1:5,g2:5,g3:4.5 }
-};
+    h3 {
+      text-align: center;
+    }
 
-/* ================= BREAK TIME ================= */
-const breakTimes = [
-  { start:"09:30",end:"09:40" },
-  { start:"11:30",end:"12:30" },
-  { start:"14:30",end:"14:40" },
-  { start:"16:30",end:"17:00" },
-  { start:"21:30",end:"21:40" },
-  { start:"23:30",end:"00:30" },
-  { start:"02:30",end:"02:40" },
-  { start:"04:30",end:"05:00" }
-];
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
 
-/* ================= LIFF ================= */
-let userId = "";
+    select,
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 6px;
+      font-size: 16px;
+    }
 
-liff.init({ liffId: LIFF_ID }).then(() => {
-  if (!liff.isLoggedIn()) {
-    liff.login();
-  } else {
-    liff.getProfile().then(profile => {
-      userId = profile.userId;
+    button {
+      margin-top: 20px;
+      background: #06c755;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h3>เปลี่ยนแบตรถ Forklift</h3>
+
+  <label>Process No</label>
+  <select id="processNo" onchange="previewChangeTime()">
+    <option value="">-- เลือก Process --</option>
+
+    <option value="Transit G2">Transit G2</option>
+    <option value="Transit P-lane in G2">Transit P-lane in G2</option>
+    <option value="P-lane Out G2">P-lane Out G2</option>
+    <option value="Pre-Sort G2">Pre-Sort G2</option>
+    <option value="Empty G2">Empty G2</option>
+
+    <option value="Transit G3">Transit G3</option>
+    <option value="Transit P-lane in G3">Transit P-lane in G3</option>
+    <option value="P-lane Out G3">P-lane Out G3</option>
+    <option value="Empty G3">Empty G3</option>
+  </select>
+
+  <label>Forklift No</label>
+  <select id="flNumber" onchange="updateBT()">
+    <option value="">-- เลือก Forklift --</option>
+  </select>
+
+  <label>Battery No</label>
+  <select id="btNumber" onchange="previewChangeTime()">
+    <option value="">-- เลือก Battery --</option>
+  </select>
+
+  <label>เวลาเปลี่ยนแบตครั้งถัดไป</label>
+  <div id="changeDateTime" style="margin-top:6px;padding:12px;background:#fff;border-radius:6px;font-size:16px;">
+    กรุณาเลือก Process
+  </div>
+
+  <button onclick="submitForm()">บันทึกข้อมูล</button>
+
+  <script>
+    /* ================= CONFIG ================= */
+    const LIFF_ID = "2008917250-2HZ9qo2C";
+    const FLOW_URL = "https://defaultd9cd485e39bd4cc995398c97631fbb.71.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/6195382cbe7940ccb47ec0b364f02c8b/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=LOAM7JCklNTPQbiVkRekzwQFxFiQ32bUtKrMf7Vb5Pc";
+
+    /* ================= FL / BT GROUP ================= */
+    const flGroup1 = ["FL-14", "FL-18", "FL-19", "FL-20", "FL-21", "FL-22", "FL-30"];
+    const flGroup2 = ["FL-01", "FL-02", "FL-04", "FL-05", "FL-06", "FL-07", "FL-08", "FL-09", "FL-16", "FL-23", "FL-24", "FL-26", "FL-27", "FL-15", "FL-17"];
+    const flGroup3 = ["FL-10", "FL-11", "FL-13", "FL-29", "FL-32", "FL-33", "FL-34", "FL-35", "FL-36", "FL-37", "FL-38"];
+
+    const btGroup1 = ["R-15686", "R-15687", "R-15688", "R-15689", "R-15690", "R-15691", "R-15692", "R-15693"];
+    const btGroup2 = ["R-15707", "R-15708", "R-15709", "R-15710", "R-15711", "R-15712", "R-15713", "R-15714", "R-15715", "R-15716", "R-15717", "R-15718", "R-15719", "R-15720", "R-15721", "R-15765", "R-16127"];
+    const btGroup3 = ["R-15651", "R-15652", "R-15653", "R-15654", "R-15655", "R-15656", "R-15657", "R-15658", "R-15659", "R-15660", "R-15661", "R-15662", "R-15663"];
+
+    /* ================= PROCESS → HOURS ================= */
+    const processHourMap = {
+      "Transit G2": { g1: 16, g2: 16, g3: 15 },
+      "Transit P-lane in G2": { g1: 5, g2: 5, g3: 4.5 },
+      "P-lane Out G2": { g1: 6, g2: 6, g3: 5 },
+      "Pre-Sort G2": { g1: 5, g2: 5, g3: 4.5 },
+      "Empty G2": { g1: 5, g2: 5, g3: 4 },
+
+      "Transit G3": { g1: 16, g2: 16, g3: 15 },
+      "Transit P-lane in G3": { g1: 4.5, g2: 4.5, g3: 4 },
+      "P-lane Out G3": { g1: 5.5, g2: 5.5, g3: 5 },
+      "Empty G3": { g1: 5, g2: 5, g3: 4.5 }
+    };
+
+    /* ================= BREAK TIME ================= */
+    const breakTimes = [
+      { start: "09:30", end: "09:40" },
+      { start: "11:30", end: "12:30" },
+      { start: "14:30", end: "14:40" },
+      { start: "16:30", end: "17:00" },
+      { start: "21:30", end: "21:40" },
+      { start: "23:30", end: "00:30" },
+      { start: "02:30", end: "02:40" },
+      { start: "04:30", end: "05:00" }
+    ];
+
+    /* ================= LIFF ================= */
+    liff.init({ liffId: LIFF_ID }).then(() => {
+      if (!liff.isLoggedIn()) liff.login();
     });
-  }
-});
 
-/* ================= UTIL ================= */
-const pad = n => n.toString().padStart(2,"0");
-const formatTime = d => `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-const formatDate = d => `${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}`;
-const formatThaiDate = d => {
-  const m = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
-  return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear()+543}`;
-};
+    /* ================= UTIL ================= */
+    const pad = n => n.toString().padStart(2, "0");
+    const formatTime = d => `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    const formatDate = d => `${d.getFullYear()}/${pad(d.getMonth() + 1)}/${pad(d.getDate())}`;
+    const formatThaiDate = d => {
+      const m = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+      return `${d.getDate()} ${m[d.getMonth()]} ${d.getFullYear() + 543}`;
+    };
 
-function getSubmitDateTime(){ return new Date(); }
+    function getSubmitDateTime() { return new Date(); }
 
-/* ================= LOGIC ================= */
-function isBreakTime(date){
-  const min = date.getHours()*60 + date.getMinutes();
-  return breakTimes.some(b=>{
-    const [sh,sm]=b.start.split(":").map(Number);
-    const [eh,em]=b.end.split(":").map(Number);
-    const s=sh*60+sm, e=eh*60+em;
-    return s>e ? min>=s||min<e : min>=s&&min<e;
-  });
-}
+    /* ================= LOGIC ================= */
+    function isBreakTime(date) {
+      const min = date.getHours() * 60 + date.getMinutes();
+      return breakTimes.some(b => {
+        const [sh, sm] = b.start.split(":").map(Number);
+        const [eh, em] = b.end.split(":").map(Number);
+        const s = sh * 60 + sm, e = eh * 60 + em;
+        return s > e ? min >= s || min < e : min >= s && min < e;
+      });
+    }
 
-function addWorkingHours(start,h){
-  let cur=new Date(start), min=h*60;
-  while(min>0){
-    cur.setMinutes(cur.getMinutes()+1);
-    if(!isBreakTime(cur)) min--;
-  }
-  return cur;
-}
+    function addWorkingHours(start, h) {
+      let cur = new Date(start), min = h * 60;
+      while (min > 0) {
+        cur.setMinutes(cur.getMinutes() + 1);
+        if (!isBreakTime(cur)) min--;
+      }
+      return cur;
+    }
 
-function getGroup(fl){
-  if(flGroup1.includes(fl)) return "g1";
-  if(flGroup2.includes(fl)) return "g2";
-  if(flGroup3.includes(fl)) return "g3";
-  return null;
-}
+    function getChangeDateTime(submit) {
+      const p = processNo.value, fl = flNumber.value;
+      if (!p || !fl) return null;
 
-function getChangeDateTime(submit){
-  const p=processNo.value;
-  const fl=flNumber.value;
-  if(!p||!fl) return null;
+      let g = null;
+      if (flGroup1.includes(fl)) g = "g1";
+      else if (flGroup2.includes(fl)) g = "g2";
+      else if (flGroup3.includes(fl)) g = "g3";
 
-  const g=getGroup(fl);
-  const h=processHourMap[p]?.[g];
-  if(!h) return null;
+      const h = processHourMap[p]?.[g];
+      if (!h) return null;
 
-  return addWorkingHours(submit,h);
-}
+      return addWorkingHours(submit, h);
+    }
 
-function updateBT(){
-  const fl=flNumber.value;
-  btNumber.innerHTML='<option value="">-- เลือก Battery --</option>';
+    function updateBT() {
+      const fl = flNumber.value, bt = btNumber;
+      bt.innerHTML = '<option value="">-- เลือก Battery --</option>';
 
-  let list=[];
-  if(flGroup1.includes(fl)) list=btGroup1;
-  else if(flGroup2.includes(fl)) list=btGroup2;
-  else if(flGroup3.includes(fl)) list=btGroup3;
+      let list = [];
+      if (flGroup1.includes(fl)) list = btGroup1;
+      else if (flGroup2.includes(fl)) list = btGroup2;
+      else if (flGroup3.includes(fl)) list = btGroup3;
 
-  list.forEach(b=>{
-    btNumber.innerHTML+=`<option value="${b}">${b}</option>`;
-  });
+      list.forEach(b => bt.innerHTML += `<option>${b}</option>`);
+      previewChangeTime();
+    }
 
-  previewChangeTime();
-}
+    function previewChangeTime() {
+      const box = document.getElementById("changeDateTime");
+      if (!processNo.value) { box.textContent = "กรุณาเลือก Process"; return; }
+      if (!flNumber.value) { box.textContent = "กรุณาเลือก Forklift"; return; }
 
-function previewChangeTime(){
-  const box=document.getElementById("changeDateTime");
+      const d = getChangeDateTime(getSubmitDateTime());
+      if (!d) { box.textContent = "-"; return; }
 
-  if(!processNo.value){ box.textContent="กรุณาเลือก Process"; return; }
-  if(!flNumber.value){ box.textContent="กรุณาเลือก Forklift"; return; }
+      box.innerHTML = `📅 ${formatThaiDate(d)}<br>⏰ ${formatTime(d)}`;
 
-  const submit=getSubmitDateTime();
-  const changeDate=getChangeDateTime(submit);
-  if(!changeDate){ box.textContent="-"; return; }
 
-  const group=getGroup(flNumber.value);
-  const hours=processHourMap[processNo.value]?.[group];
+    }
 
-  box.innerHTML=`
-    📅 ${formatThaiDate(changeDate)}<br>
-    ⏰ ${formatTime(changeDate)}<br>
-    ⏳ ใช้เวลา ${hours} ชั่วโมง
-  `;
-}
+    /* ================= INIT FL ================= */
+    for (let i = 1; i <= 40; i++) {
+      const f = `FL - ${String(i).padStart(2, "0")} `;
+      flNumber.innerHTML += `< option > ${f}</option >`;
+    }
 
-/* ================= INIT FL ================= */
-for(let i=1;i<=40;i++){
-  const f=`FL-${String(i).padStart(2,"0")}`;
-  flNumber.innerHTML+=`<option value="${f}">${f}</option>`;
-}
+    /* ================= SUBMIT ================= */
+    function submitForm() {
+      if (!processNo.value || !flNumber.value || !btNumber.value) {
+        alert("กรุณาเลือกข้อมูลให้ครบ");
+        return;
+      }
 
-/* ================= SUBMIT ================= */
-function submitForm(){
-  if(!processNo.value||!flNumber.value||!btNumber.value){
-    alert("กรุณาเลือกข้อมูลให้ครบ");
-    return;
-  }
+      const s = getSubmitDateTime(), c = getChangeDateTime(s);
+      fetch(FLOW_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId: liff.getContext().userId,
+          processNo: processNo.value,
+          flNumber: flNumber.value,
+          btNumber: btNumber.value,
+          DateSubmit: formatDate(s),
+          TimeSubmit: formatTime(s),
+          DateChange: formatDate(c),
+          TimeChange: formatTime(c)
+        })
+      }).then(() => { alert("บันทึกเรียบร้อย"); liff.closeWindow(); });
+    }
+  </script>
+</body>
 
-  const s=getSubmitDateTime();
-  const c=getChangeDateTime(s);
-
-  fetch(FLOW_URL,{
-    method:"POST",
-    headers:{ "Content-Type":"application/json" },
-    body:JSON.stringify({
-      userId:userId,
-      processNo:processNo.value,
-      flNumber:flNumber.value,
-      btNumber:btNumber.value,
-      DateSubmit:formatDate(s),
-      TimeSubmit:formatTime(s),
-      DateChange:formatDate(c),
-      TimeChange:formatTime(c)
-    })
-  }).then(()=>{
-    alert("บันทึกเรียบร้อย");
-    liff.closeWindow();
-  });
-}
-</script>
+</html>
