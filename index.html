@@ -32,7 +32,8 @@
       padding: 12px;
       margin-top: 6px;
       font-size: 16px;
-      box-sizing: border-box; /* 👈 สำคัญมาก */
+      box-sizing: border-box;
+      /* 👈 สำคัญมาก */
     }
 
     button {
@@ -42,7 +43,6 @@
       border: none;
       border-radius: 6px;
     }
-
   </style>
 </head>
 
@@ -193,13 +193,40 @@
 
     function previewChangeTime() {
       const box = document.getElementById("changeDateTime");
-      if (!processNo.value) { box.textContent = "กรุณาเลือก Process"; return; }
-      if (!flNumber.value) { box.textContent = "กรุณาเลือก Forklift"; return; }
 
-      const d = getChangeDateTime(getSubmitDateTime());
-      if (!d) { box.textContent = "-"; return; }
+      if (!processNo.value) {
+        box.textContent = "กรุณาเลือก Process";
+        return;
+      }
 
-      box.innerHTML = `📅 ${formatThaiDate(d)}<br>⏰ ${formatTime(d)}`;
+      if (!flNumber.value) {
+        box.textContent = "กรุณาเลือก Forklift";
+        return;
+      }
+
+      const submit = getSubmitDateTime();
+      const d = getChangeDateTime(submit);
+
+      if (!d) {
+        box.textContent = "-";
+        return;
+      }
+
+      // 🔥 หา group
+      let g = null;
+      if (flGroup1.includes(flNumber.value)) g = "g1";
+      else if (flGroup2.includes(flNumber.value)) g = "g2";
+      else if (flGroup3.includes(flNumber.value)) g = "g3";
+
+      // 🔥 ดึงชั่วโมงจาก process map
+      const addHours = processHourMap[processNo.value]?.[g] || 0;
+
+      // 🔥 แสดงผล
+      box.innerHTML = `
+    📅 ${formatThaiDate(d)}<br>
+    ⏰ ${formatTime(d)}<br>
+    ⏳ ใช้เวลา ${addHours} ชั่วโมง
+  `;
     }
 
     /* ================= INIT FL ================= */
