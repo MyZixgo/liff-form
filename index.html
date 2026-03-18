@@ -25,6 +25,13 @@
       font-weight: bold;
     }
 
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 6px;
+      font-size: 16px;
+    }
+
     select,
     button {
       width: 100%;
@@ -52,13 +59,13 @@
     <option value="">-- เลือก Process --</option>
 
     <option value="Transit G2">Transit G2</option>
-    <option value="P-lane in G2">P-lane in G2</option>
+    <option value="Transit P-lane in G2">Transit P-lane in G2</option>
     <option value="P-lane Out G2">P-lane Out G2</option>
     <option value="Pre-Sort G2">Pre-Sort G2</option>
     <option value="Empty G2">Empty G2</option>
 
     <option value="Transit G3">Transit G3</option>
-    <option value="P-lane in G3">P-lane in G3</option>
+    <option value="Transit P-lane in G3">Transit P-lane in G3</option>
     <option value="P-lane Out G3">P-lane Out G3</option>
     <option value="Empty G3">Empty G3</option>
   </select>
@@ -72,6 +79,10 @@
   <select id="btNumber" onchange="previewChangeTime()">
     <option value="">-- เลือก Battery --</option>
   </select>
+
+  <!-- เพิ่มใต้ Battery No -->
+  <label>Mileage (km)</label>
+  <input type="number" id="mileage" placeholder="กรอกเลขไมล์รถ" />
 
   <label>เวลาเปลี่ยนแบตครั้งถัดไป</label>
   <div id="changeDateTime" style="margin-top:6px;padding:12px;background:#fff;border-radius:6px;font-size:16px;">
@@ -97,13 +108,13 @@
     /* ================= PROCESS → HOURS ================= */
     const processHourMap = {
       "Transit G2": { g1: 16, g2: 16, g3: 15 },
-      "Transit P-lane in G2": { g1: 5, g2: 5, g3: 4.5 },
+      "P-lane in G2": { g1: 5, g2: 5, g3: 4.5 },
       "P-lane Out G2": { g1: 6, g2: 6, g3: 5 },
       "Pre-Sort G2": { g1: 5, g2: 5, g3: 4.5 },
       "Empty G2": { g1: 5, g2: 5, g3: 4 },
 
       "Transit G3": { g1: 16, g2: 16, g3: 15 },
-      "Transit P-lane in G3": { g1: 4.5, g2: 4.5, g3: 4 },
+      "P-lane in G3": { g1: 4.5, g2: 4.5, g3: 4 },
       "P-lane Out G3": { g1: 5.5, g2: 5.5, g3: 5 },
       "Empty G3": { g1: 5, g2: 5, g3: 4.5 }
     };
@@ -203,12 +214,13 @@
 
     /* ================= SUBMIT ================= */
     function submitForm() {
-      if (!processNo.value || !flNumber.value || !btNumber.value) {
+      if (!processNo.value || !flNumber.value || !btNumber.value || !mileage.value) {
         alert("กรุณาเลือกข้อมูลให้ครบ");
         return;
       }
 
       const s = getSubmitDateTime(), c = getChangeDateTime(s);
+
       fetch(FLOW_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -217,16 +229,19 @@
           processNo: processNo.value,
           flNumber: flNumber.value,
           btNumber: btNumber.value,
+          mileage: mileage.value, // 👈 เพิ่มตรงนี้
           DateSubmit: formatDate(s),
           TimeSubmit: formatTime(s),
           DateChange: formatDate(c),
           TimeChange: formatTime(c)
         })
-      }).then(() => { alert("บันทึกเรียบร้อย"); liff.closeWindow(); });
+      }).then(() => {
+        alert("บันทึกเรียบร้อย");
+        liff.closeWindow();
+      });
     }
+
   </script>
 </body>
 
 </html>
-
-
